@@ -169,116 +169,124 @@ const Globe = () => {
     });
   };
 
-  // Mouse interaction handlers (from the old working code)
-  const handleMouseDown = (event) => {
-    if (!camera.current) return;
+  useEffect(() => {
+    const handleMouseDown = (event) => {
+      if (!camera.current) return;
 
-    isDragging.current = false;
-    isMouseDown.current = true;
-    clickStart.current = {
-      x: event.clientX,
-      y: event.clientY,
-    };
-
-    const mouse = {
-      x: (event.clientX / window.innerWidth) * 2 - 1,
-      y: -(event.clientY / window.innerHeight) * 2 + 1,
-    };
-
-    raycaster.setFromCamera(mouse, camera.current);
-    const intersects = raycaster.intersectObjects(scene.current.children, true);
-
-    if (intersects.length > 0) {
-      const clickedObject = intersects[0].object;
-      if (
-        clickedObject &&
-        clickedObject.userData &&
-        clickedObject.userData.isCountry
-      ) {
-        clickedCountry.current = clickedObject.userData.countryData;
-        console.log("Country clicked:", clickedCountry.current);
-      } else {
-        clickedCountry.current = null;
-      }
-    } else {
-      clickedCountry.current = null;
-    }
-  };
-
-  const handleMouseMove = (event) => {
-    if (
-      !clickStart.current ||
-      !globe.current ||
-      !isMouseDown.current ||
-      !camera.current
-    )
-      return;
-
-    const deltaMove = {
-      x: event.clientX - clickStart.current.x,
-      y: event.clientY - clickStart.current.y,
-    };
-
-    if (Math.abs(deltaMove.x) > 2 || Math.abs(deltaMove.y) > 2) {
-      isDragging.current = true;
-      globe.current.rotation.y += deltaMove.x * 0.005;
-      globe.current.rotation.x += deltaMove.y * 0.005;
-      velocity.current.x = deltaMove.x * 0.0005;
-      velocity.current.y = deltaMove.y * 0.0005;
-
+      isDragging.current = false;
+      isMouseDown.current = true;
       clickStart.current = {
         x: event.clientX,
         y: event.clientY,
       };
-    }
-  };
 
-  const handleMouseUp = (event) => {
-    if (!camera.current) return;
+      const mouse = {
+        x: (event.clientX / window.innerWidth) * 2 - 1,
+        y: -(event.clientY / window.innerHeight) * 2 + 1,
+      };
 
-    // If it's not dragging and a country was clicked
-    if (!isDragging.current && clickedCountry.current) {
-      // Check if the country exists in the database (visited countries)
-      const foundCountry = countriesData.find(
-        (c) =>
-          c.name.trim().toLowerCase() ===
-          clickedCountry.current.name.trim().toLowerCase()
+      raycaster.setFromCamera(mouse, camera.current);
+      const intersects = raycaster.intersectObjects(
+        scene.current.children,
+        true
       );
 
-      if (foundCountry) {
-        // If the country exists in the database, show full data
-        setSelectedCountry(foundCountry);
+      if (intersects.length > 0) {
+        const clickedObject = intersects[0].object;
+        if (
+          clickedObject &&
+          clickedObject.userData &&
+          clickedObject.userData.isCountry
+        ) {
+          clickedCountry.current = clickedObject.userData.countryData;
+          console.log("Country clicked:", clickedCountry.current);
+        } else {
+          clickedCountry.current = null;
+        }
       } else {
-        // For non-visited countries or those not in the DB
-        setSelectedCountry({
-          name: clickedCountry.current.name,
-          visited: false,
-          cities: [],
-          recommendations: "No recommendations available",
-          highlights: "No highlights available",
-          dislikes: "No dislikes available",
-        });
+        clickedCountry.current = null;
       }
-    }
+    };
 
-    inertia.current.x = Math.min(
-      Math.max(velocity.current.x, -MAX_SPEED),
-      MAX_SPEED
-    );
-    inertia.current.y = Math.min(
-      Math.max(velocity.current.y, -MAX_SPEED),
-      MAX_SPEED
-    );
+    const handleMouseMove = (event) => {
+      if (
+        !clickStart.current ||
+        !globe.current ||
+        !isMouseDown.current ||
+        !camera.current
+      )
+        return;
 
-    clickStart.current = null;
-    clickedCountry.current = null;
-    isDragging.current = false;
-    isMouseDown.current = false;
-  };
+      const deltaMove = {
+        x: event.clientX - clickStart.current.x,
+        y: event.clientY - clickStart.current.y,
+      };
 
-  window.addEventListener("mousedown", handleMouseDown);
-  window.addEventListener("mousemove", handleMouseMove);
-  window.addEventListener("mouseup", handleMouseUp);
+      if (Math.abs(deltaMove.x) > 2 || Math.abs(deltaMove.y) > 2) {
+        isDragging.current = true;
+        globe.current.rotation.y += deltaMove.x * 0.005;
+        globe.current.rotation.x += deltaMove.y * 0.005;
+        velocity.current.x = deltaMove.x * 0.0005;
+        velocity.current.y = deltaMove.y * 0.0005;
+
+        clickStart.current = {
+          x: event.clientX,
+          y: event.clientY,
+        };
+      }
+    };
+
+    const handleMouseUp = (event) => {
+      if (!camera.current) return;
+
+      if (!isDragging.current && clickedCountry.current) {
+        const foundCountry = countriesData.find(
+          (c) =>
+            c.name.trim().toLowerCase() ===
+            clickedCountry.current.name.trim().toLowerCase()
+        );
+
+        if (foundCountry) {
+          setSelectedCountry(foundCountry);
+        } else {
+          setSelectedCountry({
+            name: clickedCountry.current.name,
+            visited: false,
+            cities: [],
+            recommendations: "No recommendations available",
+            highlights: "No highlights available",
+            dislikes: "No dislikes available",
+          });
+        }
+      }
+
+      inertia.current.x = Math.min(
+        Math.max(velocity.current.x, -MAX_SPEED),
+        MAX_SPEED
+      );
+      inertia.current.y = Math.min(
+        Math.max(velocity.current.y, -MAX_SPEED),
+        MAX_SPEED
+      );
+
+      clickStart.current = null;
+      clickedCountry.current = null;
+      isDragging.current = false;
+      isMouseDown.current = false;
+    };
+
+    // Add event listeners only once
+    window.addEventListener("mousedown", handleMouseDown);
+    window.addEventListener("mousemove", handleMouseMove);
+    window.addEventListener("mouseup", handleMouseUp);
+
+    // Clean up event listeners when component unmounts
+    return () => {
+      window.removeEventListener("mousedown", handleMouseDown);
+      window.removeEventListener("mousemove", handleMouseMove);
+      window.removeEventListener("mouseup", handleMouseUp);
+    };
+  }, [countriesData]); // Include dependencies that affect the event listeners
 
   return (
     <div>
@@ -289,6 +297,7 @@ const Globe = () => {
         onClose={() => setSelectedCountry(null)}
         setCountriesData={setCountriesData} // Pass this to allow modal to update the data
         countriesData={countriesData} // Pass this to allow data access in the modal
+        setSelectedCountry={setSelectedCountry} // Pass setSelectedCountry to modal
       />
     </div>
   );
