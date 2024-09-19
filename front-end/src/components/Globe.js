@@ -244,6 +244,8 @@ const Globe = () => {
         isOpen={!!selectedCountry}
         countryData={selectedCountry}
         onClose={() => setSelectedCountry(null)}
+        setCountriesData={setCountriesData} // Pass this to allow modal to update the data
+        countriesData={countriesData} // Pass this to allow data access in the modal
       />
     </div>
   );
