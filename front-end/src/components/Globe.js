@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import * as THREE from "three";
-import axios from "axios"; // Ensure axios is installed
+import axios from "axios";
 import CountryModal from "./CountryModal";
 
 const Globe = () => {
@@ -23,12 +23,10 @@ const Globe = () => {
   const isMouseDown = useRef(false); // Track if the mouse is down
   const inertia = useRef({ x: 0, y: 0 }); // Inertia effect for continued spinning
 
-  // Constants for spin speed control
-  const MAX_SPEED = 0.02; // Maximum rotation speed
-  const FRICTION = 0.98; // Friction to slow down the spin
+  const MAX_SPEED = 0.02;
+  const FRICTION = 0.98;
 
   useEffect(() => {
-    // Fetch country details (hardcoded data) from the backend
     axios
       .get("http://localhost:3000/countries")
       .then((response) => {
@@ -38,7 +36,6 @@ const Globe = () => {
         console.error("Error fetching countries data:", error);
       });
 
-    // Load the GeoJSON file for country borders (for globe rendering)
     fetch("/data/countries.geojson")
       .then((response) => response.json())
       .then((geoData) => {
@@ -58,7 +55,7 @@ const Globe = () => {
 
           const geometry = new THREE.SphereGeometry(5, 32, 32);
           const material = new THREE.MeshBasicMaterial({
-            color: 0x87ceeb,
+            color: 0x000033, // Dark blue background for contrast
             wireframe: false,
           });
           globe.current = new THREE.Mesh(geometry, material);
@@ -69,11 +66,9 @@ const Globe = () => {
           const animate = () => {
             requestAnimationFrame(animate);
 
-            // Apply inertia to the globe's rotation (for continued spinning after drag)
             globe.current.rotation.y += inertia.current.x;
             globe.current.rotation.x += inertia.current.y;
 
-            // Slow down the inertia gradually
             inertia.current.x *= FRICTION;
             inertia.current.y *= FRICTION;
 
@@ -88,42 +83,39 @@ const Globe = () => {
   }, []);
 
   useEffect(() => {
-    // Only proceed if both geoJsonCountries and countriesData are loaded
     if (geoJsonCountries.length > 0 && countriesData.length > 0) {
       mapCountriesToGlobe(geoJsonCountries);
     }
   }, [geoJsonCountries, countriesData]);
 
-  // Function to map GeoJSON countries onto the globe
   const mapCountriesToGlobe = (features) => {
     features.forEach((feature) => {
       const { coordinates } = feature.geometry;
-      let countryName = feature.properties.admin.trim().toLowerCase(); // Normalize GeoJSON country name
+      let countryName = feature.properties.admin.trim().toLowerCase();
 
-      // Check if this country exists in hardcoded countriesData
+      const baseColor = 0xff0000; // Red for non-visited countries
+
       const country = countriesData.find(
         (c) => c.name.trim().toLowerCase() === countryName
       );
 
-      // Set color based on whether the country is visited or not
-      const countryColor = country && country.visited ? 0x00ff00 : 0xff0000; // Green for visited, Red for not visited
+      const countryColor = country && country.visited ? 0x00ff00 : 0xff0000;
 
       const countryGroup = new THREE.Group();
+      const color = country ? countryColor : baseColor;
 
-      // Render countries as polygons or multipolygons
       if (feature.geometry.type === "Polygon") {
-        mapPolygonToGlobe(coordinates, countryGroup, countryColor, country);
+        mapPolygonToGlobe(coordinates, countryGroup, color, country);
       } else if (feature.geometry.type === "MultiPolygon") {
         coordinates.forEach((polygon) => {
-          mapPolygonToGlobe(polygon, countryGroup, countryColor, country);
+          mapPolygonToGlobe(polygon, countryGroup, color, country);
         });
       }
 
-      globe.current.add(countryGroup); // Add the country group to the globe
+      globe.current.add(countryGroup);
     });
   };
 
-  // Helper function to map a single polygon to the globe
   const mapPolygonToGlobe = (polygon, countryGroup, countryColor, country) => {
     polygon.forEach((coordSet) => {
       const points = [];
@@ -141,26 +133,24 @@ const Globe = () => {
 
       const geometry = new THREE.BufferGeometry().setFromPoints(points);
       const material = new THREE.LineBasicMaterial({
-        color: countryColor, // Set the color (Green or Red)
-        linewidth: 1,
-        opacity: 0.8,
+        color: countryColor,
+        linewidth: 2,
+        opacity: 1,
         transparent: true,
       });
       const line = new THREE.Line(geometry, material);
 
-      // Add the country's data to the userData of the line for later retrieval
       line.userData = {
         isCountry: true,
-        countryData: country, // Store the country data here
+        countryData: country,
       };
 
       countryGroup.add(line);
     });
   };
 
-  // Mouse interaction handlers
+  // Mouse interaction handlers (from the old working code)
   const handleMouseDown = (event) => {
-    // Ensure camera is initialized before proceeding
     if (!camera.current) return;
 
     isDragging.current = false;
@@ -170,29 +160,22 @@ const Globe = () => {
       y: event.clientY,
     };
 
-    // Detect which country was clicked on mousedown
     const mouse = {
       x: (event.clientX / window.innerWidth) * 2 - 1,
       y: -(event.clientY / window.innerHeight) * 2 + 1,
     };
 
-    // Only proceed if camera is ready
-    if (camera.current) {
-      raycaster.setFromCamera(mouse, camera.current);
-      const intersects = raycaster.intersectObjects(
-        scene.current.children,
-        true
-      );
+    raycaster.setFromCamera(mouse, camera.current);
+    const intersects = raycaster.intersectObjects(scene.current.children, true);
 
-      if (intersects.length > 0) {
-        const clickedObject = intersects[0].object;
-        if (
-          clickedObject &&
-          clickedObject.userData &&
-          clickedObject.userData.isCountry
-        ) {
-          clickedCountry.current = clickedObject.userData.countryData; // Track the country on mouse down
-        }
+    if (intersects.length > 0) {
+      const clickedObject = intersects[0].object;
+      if (
+        clickedObject &&
+        clickedObject.userData &&
+        clickedObject.userData.isCountry
+      ) {
+        clickedCountry.current = clickedObject.userData.countryData;
       }
     }
   };
@@ -215,7 +198,7 @@ const Globe = () => {
       isDragging.current = true;
       globe.current.rotation.y += deltaMove.x * 0.005;
       globe.current.rotation.x += deltaMove.y * 0.005;
-      velocity.current.x = deltaMove.x * 0.0005; // Capture velocity based on drag speed
+      velocity.current.x = deltaMove.x * 0.0005;
       velocity.current.y = deltaMove.y * 0.0005;
 
       clickStart.current = {
@@ -253,70 +236,9 @@ const Globe = () => {
   window.addEventListener("mousedown", handleMouseDown);
   window.addEventListener("mousemove", handleMouseMove);
   window.addEventListener("mouseup", handleMouseUp);
-  const Globe = () => {
-    return (
-      <div>
-        {/* Legend */}
-        <div style={legendStyle}>
-          <div style={{ display: "flex", alignItems: "center" }}>
-            <div style={visitedColorStyle} />
-            <span style={{ marginLeft: "5px" }}>Visited</span>
-          </div>
-          <div
-            style={{ display: "flex", alignItems: "center", marginTop: "5px" }}
-          >
-            <div style={nonVisitedColorStyle} />
-            <span style={{ marginLeft: "5px" }}>Non-Visited</span>
-          </div>
-        </div>
-
-        {/* Globe rendering */}
-        <div ref={globeRef} />
-        {/* Modal and other components here */}
-      </div>
-    );
-  };
-
-  // Styles for legend and colors
-  const legendStyle = {
-    position: "absolute",
-    top: "10px",
-    right: "10px",
-    padding: "10px",
-    backgroundColor: "rgba(255, 255, 255, 0.8)",
-    borderRadius: "5px",
-    fontSize: "14px",
-  };
-
-  const visitedColorStyle = {
-    width: "15px",
-    height: "15px",
-    backgroundColor: "#00ff00",
-    borderRadius: "50%",
-  };
-
-  const nonVisitedColorStyle = {
-    width: "15px",
-    height: "15px",
-    backgroundColor: "#ff0000",
-    borderRadius: "50%",
-  };
 
   return (
     <div>
-      {/* Legend */}
-      <div style={legendStyle}>
-        <div style={{ display: "flex", alignItems: "center" }}>
-          <div style={visitedColorStyle} />
-          <span style={{ marginLeft: "5px" }}>Visited</span>
-        </div>
-        <div
-          style={{ display: "flex", alignItems: "center", marginTop: "5px" }}
-        >
-          <div style={nonVisitedColorStyle} />
-          <span style={{ marginLeft: "5px" }}>Non-Visited</span>
-        </div>
-      </div>
       <div ref={globeRef} />
       <CountryModal
         isOpen={!!selectedCountry}
