@@ -18,6 +18,14 @@ const Globe = () => {
   const globe = useRef(null);
   const isDragging = useRef(false);
   const clickStart = useRef(null);
+  const clickedCountry = useRef(null); // Track the country clicked on mouse down
+  const velocity = useRef({ x: 0, y: 0 }); // Velocity of spin
+  const isMouseDown = useRef(false); // Track if the mouse is down
+  const inertia = useRef({ x: 0, y: 0 }); // Inertia effect for continued spinning
+
+  // Constants for spin speed control
+  const MAX_SPEED = 0.02; // Maximum rotation speed
+  const FRICTION = 0.98; // Friction to slow down the spin
 
   useEffect(() => {
     // Fetch country details (hardcoded data) from the backend
@@ -60,9 +68,15 @@ const Globe = () => {
 
           const animate = () => {
             requestAnimationFrame(animate);
-            if (!isDragging.current && globe.current) {
-              globe.current.rotation.y += 0.01;
-            }
+
+            // Apply inertia to the globe's rotation (for continued spinning after drag)
+            globe.current.rotation.y += inertia.current.x;
+            globe.current.rotation.x += inertia.current.y;
+
+            // Slow down the inertia gradually
+            inertia.current.x *= FRICTION;
+            inertia.current.y *= FRICTION;
+
             renderer.current.render(scene.current, camera.current);
           };
           animate();
@@ -76,10 +90,7 @@ const Globe = () => {
   useEffect(() => {
     // Only proceed if both geoJsonCountries and countriesData are loaded
     if (geoJsonCountries.length > 0 && countriesData.length > 0) {
-      console.log("Both geoJsonCountries and countriesData are loaded.");
       mapCountriesToGlobe(geoJsonCountries);
-    } else {
-      console.log("Waiting for geoJsonCountries or countriesData to load...");
     }
   }, [geoJsonCountries, countriesData]);
 
@@ -89,8 +100,6 @@ const Globe = () => {
       const { coordinates } = feature.geometry;
       let countryName = feature.properties.admin.trim().toLowerCase(); // Normalize GeoJSON country name
 
-      console.log(`GeoJSON countryName (admin): ${countryName}`);
-
       // Check if this country exists in hardcoded countriesData
       const country = countriesData.find(
         (c) => c.name.trim().toLowerCase() === countryName
@@ -98,20 +107,15 @@ const Globe = () => {
 
       // Set color based on whether the country is visited or not
       const countryColor = country && country.visited ? 0x00ff00 : 0xff0000; // Green for visited, Red for not visited
-      console.log(
-        `Coloring country: ${countryName} as ${
-          countryColor === 0x00ff00 ? "Green" : "Red"
-        }`
-      );
 
       const countryGroup = new THREE.Group();
 
       // Render countries as polygons or multipolygons
       if (feature.geometry.type === "Polygon") {
-        mapPolygonToGlobe(coordinates, countryGroup, countryColor);
+        mapPolygonToGlobe(coordinates, countryGroup, countryColor, country);
       } else if (feature.geometry.type === "MultiPolygon") {
         coordinates.forEach((polygon) => {
-          mapPolygonToGlobe(polygon, countryGroup, countryColor);
+          mapPolygonToGlobe(polygon, countryGroup, countryColor, country);
         });
       }
 
@@ -120,7 +124,7 @@ const Globe = () => {
   };
 
   // Helper function to map a single polygon to the globe
-  const mapPolygonToGlobe = (polygon, countryGroup, countryColor) => {
+  const mapPolygonToGlobe = (polygon, countryGroup, countryColor, country) => {
     polygon.forEach((coordSet) => {
       const points = [];
 
@@ -143,21 +147,64 @@ const Globe = () => {
         transparent: true,
       });
       const line = new THREE.Line(geometry, material);
+
+      // Add the country's data to the userData of the line for later retrieval
+      line.userData = {
+        isCountry: true,
+        countryData: country, // Store the country data here
+      };
+
       countryGroup.add(line);
     });
   };
 
   // Mouse interaction handlers
   const handleMouseDown = (event) => {
+    // Ensure camera is initialized before proceeding
+    if (!camera.current) return;
+
     isDragging.current = false;
+    isMouseDown.current = true;
     clickStart.current = {
       x: event.clientX,
       y: event.clientY,
     };
+
+    // Detect which country was clicked on mousedown
+    const mouse = {
+      x: (event.clientX / window.innerWidth) * 2 - 1,
+      y: -(event.clientY / window.innerHeight) * 2 + 1,
+    };
+
+    // Only proceed if camera is ready
+    if (camera.current) {
+      raycaster.setFromCamera(mouse, camera.current);
+      const intersects = raycaster.intersectObjects(
+        scene.current.children,
+        true
+      );
+
+      if (intersects.length > 0) {
+        const clickedObject = intersects[0].object;
+        if (
+          clickedObject &&
+          clickedObject.userData &&
+          clickedObject.userData.isCountry
+        ) {
+          clickedCountry.current = clickedObject.userData.countryData; // Track the country on mouse down
+        }
+      }
+    }
   };
 
   const handleMouseMove = (event) => {
-    if (!clickStart.current || !globe.current) return; // Check if globe is initialized
+    if (
+      !clickStart.current ||
+      !globe.current ||
+      !isMouseDown.current ||
+      !camera.current
+    )
+      return;
 
     const deltaMove = {
       x: event.clientX - clickStart.current.x,
@@ -168,6 +215,9 @@ const Globe = () => {
       isDragging.current = true;
       globe.current.rotation.y += deltaMove.x * 0.005;
       globe.current.rotation.x += deltaMove.y * 0.005;
+      velocity.current.x = deltaMove.x * 0.0005; // Capture velocity based on drag speed
+      velocity.current.y = deltaMove.y * 0.0005;
+
       clickStart.current = {
         x: event.clientX,
         y: event.clientY,
@@ -176,39 +226,28 @@ const Globe = () => {
   };
 
   const handleMouseUp = (event) => {
-    if (!isDragging.current && globe.current) {
-      const mouse = {
-        x: (event.clientX / window.innerWidth) * 2 - 1,
-        y: -(event.clientY / window.innerHeight) * 2 + 1,
-      };
-      raycaster.setFromCamera(mouse, camera.current);
+    if (!camera.current) return;
 
-      const intersects = raycaster.intersectObjects(
-        scene.current.children,
-        true
-      );
-      if (intersects.length > 0) {
-        const clickedObject = intersects[0].object;
-
-        if (
-          clickedObject &&
-          clickedObject.userData &&
-          clickedObject.userData.isCountry
-        ) {
-          const countryId = clickedObject.userData.id; // Get the country ID from userData
-
-          // Find the country in the fetched countries data
-          const country = countriesData.find((c) => c.id === countryId);
-
-          if (country) {
-            setSelectedCountry(country); // Show country details in modal
-          }
-        }
+    // If it's not dragging and the country clicked on mouse down matches mouse up
+    if (!isDragging.current && clickedCountry.current) {
+      if (clickedCountry.current && clickedCountry.current.visited) {
+        setSelectedCountry(clickedCountry.current); // Only show modal if the country was visited
       }
     }
 
+    inertia.current.x = Math.min(
+      Math.max(velocity.current.x, -MAX_SPEED),
+      MAX_SPEED
+    );
+    inertia.current.y = Math.min(
+      Math.max(velocity.current.y, -MAX_SPEED),
+      MAX_SPEED
+    );
+
     clickStart.current = null;
+    clickedCountry.current = null;
     isDragging.current = false;
+    isMouseDown.current = false;
   };
 
   window.addEventListener("mousedown", handleMouseDown);
