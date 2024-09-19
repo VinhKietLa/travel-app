@@ -253,9 +253,70 @@ const Globe = () => {
   window.addEventListener("mousedown", handleMouseDown);
   window.addEventListener("mousemove", handleMouseMove);
   window.addEventListener("mouseup", handleMouseUp);
+  const Globe = () => {
+    return (
+      <div>
+        {/* Legend */}
+        <div style={legendStyle}>
+          <div style={{ display: "flex", alignItems: "center" }}>
+            <div style={visitedColorStyle} />
+            <span style={{ marginLeft: "5px" }}>Visited</span>
+          </div>
+          <div
+            style={{ display: "flex", alignItems: "center", marginTop: "5px" }}
+          >
+            <div style={nonVisitedColorStyle} />
+            <span style={{ marginLeft: "5px" }}>Non-Visited</span>
+          </div>
+        </div>
+
+        {/* Globe rendering */}
+        <div ref={globeRef} />
+        {/* Modal and other components here */}
+      </div>
+    );
+  };
+
+  // Styles for legend and colors
+  const legendStyle = {
+    position: "absolute",
+    top: "10px",
+    right: "10px",
+    padding: "10px",
+    backgroundColor: "rgba(255, 255, 255, 0.8)",
+    borderRadius: "5px",
+    fontSize: "14px",
+  };
+
+  const visitedColorStyle = {
+    width: "15px",
+    height: "15px",
+    backgroundColor: "#00ff00",
+    borderRadius: "50%",
+  };
+
+  const nonVisitedColorStyle = {
+    width: "15px",
+    height: "15px",
+    backgroundColor: "#ff0000",
+    borderRadius: "50%",
+  };
 
   return (
     <div>
+      {/* Legend */}
+      <div style={legendStyle}>
+        <div style={{ display: "flex", alignItems: "center" }}>
+          <div style={visitedColorStyle} />
+          <span style={{ marginLeft: "5px" }}>Visited</span>
+        </div>
+        <div
+          style={{ display: "flex", alignItems: "center", marginTop: "5px" }}
+        >
+          <div style={nonVisitedColorStyle} />
+          <span style={{ marginLeft: "5px" }}>Non-Visited</span>
+        </div>
+      </div>
       <div ref={globeRef} />
       <CountryModal
         isOpen={!!selectedCountry}
