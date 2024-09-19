@@ -66,11 +66,14 @@ const Globe = () => {
           const animate = () => {
             requestAnimationFrame(animate);
 
-            globe.current.rotation.y += inertia.current.x;
-            globe.current.rotation.x += inertia.current.y;
+            // Disable globe rotation when modal is open
+            if (!selectedCountry) {
+              globe.current.rotation.y += inertia.current.x;
+              globe.current.rotation.x += inertia.current.y;
 
-            inertia.current.x *= FRICTION;
-            inertia.current.y *= FRICTION;
+              inertia.current.x *= FRICTION;
+              inertia.current.y *= FRICTION;
+            }
 
             renderer.current.render(scene.current, camera.current);
           };
@@ -80,7 +83,7 @@ const Globe = () => {
       .catch((error) => {
         console.error("Error loading GeoJSON:", error);
       });
-  }, []);
+  }, [selectedCountry]);
 
   useEffect(() => {
     if (geoJsonCountries.length > 0 && countriesData.length > 0) {
@@ -171,7 +174,7 @@ const Globe = () => {
 
   useEffect(() => {
     const handleMouseDown = (event) => {
-      if (!camera.current) return;
+      if (!camera.current || !!selectedCountry) return; // Disable if modal is open
 
       isDragging.current = false;
       isMouseDown.current = true;
@@ -199,7 +202,6 @@ const Globe = () => {
           clickedObject.userData.isCountry
         ) {
           clickedCountry.current = clickedObject.userData.countryData;
-          console.log("Country clicked:", clickedCountry.current);
         } else {
           clickedCountry.current = null;
         }
@@ -213,9 +215,9 @@ const Globe = () => {
         !clickStart.current ||
         !globe.current ||
         !isMouseDown.current ||
-        !camera.current
+        !!selectedCountry
       )
-        return;
+        return; // Disable if modal is open
 
       const deltaMove = {
         x: event.clientX - clickStart.current.x,
@@ -237,7 +239,7 @@ const Globe = () => {
     };
 
     const handleMouseUp = (event) => {
-      if (!camera.current) return;
+      if (!camera.current || !!selectedCountry) return; // Disable if modal is open
 
       if (!isDragging.current && clickedCountry.current) {
         const foundCountry = countriesData.find(
@@ -286,7 +288,7 @@ const Globe = () => {
       window.removeEventListener("mousemove", handleMouseMove);
       window.removeEventListener("mouseup", handleMouseUp);
     };
-  }, [countriesData]); // Include dependencies that affect the event listeners
+  }, [countriesData, selectedCountry]); // Include dependencies that affect the event listeners
 
   return (
     <div>

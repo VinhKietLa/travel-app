@@ -78,6 +78,7 @@ const CountryModal = ({
       isOpen={isOpen}
       onRequestClose={onClose}
       contentLabel="Country Details"
+      shouldCloseOnOverlayClick={true}
       ariaHideApp={false} // This can prevent further modal issues for now
     >
       <h2>{name || "No country selected"}</h2>
