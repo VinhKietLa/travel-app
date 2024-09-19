@@ -1,15 +1,15 @@
 class CountriesController < ApplicationController
   # GET /countries
   def index
-    countries = Country.includes(:cities).all
-    render json: countries.to_json(include: :cities)
+    countries = Country.includes(:cities).all # Fetch countries with cities
+    render json: countries.as_json(include: :cities) # Include cities in the JSON response
   end
 
   # GET /countries/:id
   def show
-    country = Country.includes(:cities).find_by(id: params[:id])
+    country = Country.includes(:cities).find_by(id: params[:id]) # Include cities
     if country
-      render json: country.to_json(include: :cities)
+      render json: country.as_json(include: :cities)
     else
       render json: { error: "Country not found" }, status: 404
     end
@@ -17,10 +17,14 @@ class CountriesController < ApplicationController
 
   def update
     country = Country.find_by(id: params[:id])
-    if country.update(visited: params[:visited])
-      render json: country.to_json(include: :cities)
+
+    if country
+      if params[:visited].present?
+        country.update(visited: params[:visited]) # Update visited status
+      end
+      render json: country.as_json(include: :cities)
     else
-      render json: { error: "Unable to update country" }, status: 400
+      render json: { error: "Country not found" }, status: 404
     end
   end
 end

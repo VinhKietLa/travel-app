@@ -47,23 +47,41 @@ const CountryModal = ({
       isOpen={isOpen}
       onRequestClose={onClose}
       contentLabel="Country Details"
-      ariaHideApp={false} // This can prevent further modal issues for now
+      ariaHideApp={false}
     >
       <h2>{name || "No country selected"}</h2>
-      <p>
-        Cities Visited:{" "}
-        {cities.length > 0
-          ? cities.map((city) => city.name).join(", ")
-          : "No cities visited"}
-      </p>
-      <p>
-        Recommendations: {recommendations || "No recommendations available"}
-      </p>
-      <p>Highlights: {highlights || "No highlights available"}</p>
-      <p>Dislikes: {dislikes || "No dislikes available"}</p>
-      <button onClick={() => toggleCountryVisitStatus(countryData)}>
-        {countryData.visited ? "Mark as Non-Visited" : "Mark as Visited"}
-      </button>
+      {countryData.visited ? (
+        <div>
+          <p>
+            Cities Visited:{" "}
+            {cities.length > 0
+              ? cities.map((city) => (
+                  <div key={city.name}>
+                    <strong>{city.name}</strong>:
+                    <ul>
+                      <li>Places Stayed: {city.places_stayed}</li>
+                      <li>Recommendations: {city.recommendations}</li>
+                      <li>Highlights: {city.highlights}</li>
+                      <li>Dislikes: {city.dislikes}</li>
+                    </ul>
+                  </div>
+                ))
+              : "No cities visited"}
+          </p>
+          <p>
+            Recommendations: {recommendations || "No recommendations available"}
+          </p>
+          <p>Highlights: {highlights || "No highlights available"}</p>
+          <p>Dislikes: {dislikes || "No dislikes available"}</p>
+        </div>
+      ) : (
+        <div>
+          <p>This country has not been visited yet.</p>
+          <button onClick={() => toggleCountryVisitStatus(countryData)}>
+            {countryData.visited ? "Mark as Non-Visited" : "Mark as Visited"}
+          </button>
+        </div>
+      )}
       <button onClick={onClose}>Close</button>
     </Modal>
   );

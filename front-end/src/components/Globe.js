@@ -93,22 +93,32 @@ const Globe = () => {
       const { coordinates } = feature.geometry;
       let countryName = feature.properties.admin.trim().toLowerCase();
 
-      const baseColor = 0xff0000; // Red for non-visited countries
-
+      // Check if this country exists in the database (visited countries)
       const country = countriesData.find(
         (c) => c.name.trim().toLowerCase() === countryName
       );
 
-      const countryColor = country && country.visited ? 0x00ff00 : 0xff0000;
+      const countryColor = country && country.visited ? 0x00ff00 : 0xff0000; // Green for visited, Red for non-visited
 
       const countryGroup = new THREE.Group();
-      const color = country ? countryColor : baseColor;
 
       if (feature.geometry.type === "Polygon") {
-        mapPolygonToGlobe(coordinates, countryGroup, color, country);
+        mapPolygonToGlobe(
+          coordinates,
+          countryGroup,
+          countryColor,
+          country,
+          feature
+        );
       } else if (feature.geometry.type === "MultiPolygon") {
         coordinates.forEach((polygon) => {
-          mapPolygonToGlobe(polygon, countryGroup, color, country);
+          mapPolygonToGlobe(
+            polygon,
+            countryGroup,
+            countryColor,
+            country,
+            feature
+          );
         });
       }
 
@@ -116,7 +126,13 @@ const Globe = () => {
     });
   };
 
-  const mapPolygonToGlobe = (polygon, countryGroup, countryColor, country) => {
+  const mapPolygonToGlobe = (
+    polygon,
+    countryGroup,
+    countryColor,
+    country,
+    feature
+  ) => {
     polygon.forEach((coordSet) => {
       const points = [];
 
@@ -140,9 +156,13 @@ const Globe = () => {
       });
       const line = new THREE.Line(geometry, material);
 
+      // If country is null, set default non-visited country data
       line.userData = {
         isCountry: true,
-        countryData: country,
+        countryData: country || {
+          name: feature.properties.admin,
+          visited: false,
+        },
       };
 
       countryGroup.add(line);
@@ -176,7 +196,12 @@ const Globe = () => {
         clickedObject.userData.isCountry
       ) {
         clickedCountry.current = clickedObject.userData.countryData;
+        console.log("Country clicked:", clickedCountry.current);
+      } else {
+        clickedCountry.current = null;
       }
+    } else {
+      clickedCountry.current = null;
     }
   };
 
@@ -211,10 +236,28 @@ const Globe = () => {
   const handleMouseUp = (event) => {
     if (!camera.current) return;
 
-    // If it's not dragging and the country clicked on mouse down matches mouse up
+    // If it's not dragging and a country was clicked
     if (!isDragging.current && clickedCountry.current) {
-      if (clickedCountry.current && clickedCountry.current.visited) {
-        setSelectedCountry(clickedCountry.current); // Only show modal if the country was visited
+      // Check if the country exists in the database (visited countries)
+      const foundCountry = countriesData.find(
+        (c) =>
+          c.name.trim().toLowerCase() ===
+          clickedCountry.current.name.trim().toLowerCase()
+      );
+
+      if (foundCountry) {
+        // If the country exists in the database, show full data
+        setSelectedCountry(foundCountry);
+      } else {
+        // For non-visited countries or those not in the DB
+        setSelectedCountry({
+          name: clickedCountry.current.name,
+          visited: false,
+          cities: [],
+          recommendations: "No recommendations available",
+          highlights: "No highlights available",
+          dislikes: "No dislikes available",
+        });
       }
     }
 
