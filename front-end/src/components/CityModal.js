@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import Modal from "react-modal";
 import "./CityModal.css"; // Optional: Add your own styles
-
+import axios from "axios";
 const CityModal = ({ isOpen, cityData, onClose, onSave, onDelete }) => {
   const [name, setName] = useState(""); // New state for the city name
   const [recommendations, setRecommendations] = useState("");
@@ -25,6 +25,20 @@ const CityModal = ({ isOpen, cityData, onClose, onSave, onDelete }) => {
       highlights,
       dislikes,
     };
+
+    // Send the updated city data to the backend
+    axios
+      .put(
+        `http://localhost:3000/countries/${cityData.country_id}/cities/${cityData.id}`,
+        updatedCityData
+      ) // Ensure the correct country and city IDs are used
+      .then((response) => {
+        onSave(response.data); // Update the city data in the parent component (CountryModal)
+        onClose(); // Close the modal after saving
+      })
+      .catch((error) => {
+        console.error("Error updating city information:", error);
+      });
 
     onSave(updatedCityData); // Save changes
     onClose();

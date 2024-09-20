@@ -70,10 +70,11 @@ const CountryModal = ({
 
   // Handle saving updated city data from CityModal
   const handleSaveCity = (updatedCity) => {
+    // Map through the cities and update the city with the new data
     const updatedCities = cities.map((city) =>
       city.id === updatedCity.id ? updatedCity : city
     );
-    setCities(updatedCities);
+    setCities(updatedCities); // Update the state with the new city data
   };
 
   const handleSaveChanges = () => {
