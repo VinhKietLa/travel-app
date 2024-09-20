@@ -9,5 +9,15 @@ class CitiesController < ApplicationController
       @city = City.find(params[:id])
       render json: @city
     end
+
+    def destroy
+      city = City.find(params[:id]) # Find the city by its ID
+  
+      if city.destroy
+        render json: { message: "City deleted successfully" }, status: :ok
+      else
+        render json: { error: "Failed to delete city" }, status: :unprocessable_entity
+      end
+    end
   end
   

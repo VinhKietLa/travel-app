@@ -2,13 +2,15 @@ import React, { useState, useEffect } from "react";
 import Modal from "react-modal";
 import "./CityModal.css"; // Optional: Add your own styles
 
-const CityModal = ({ isOpen, cityData, onClose, onSave }) => {
+const CityModal = ({ isOpen, cityData, onClose, onSave, onDelete }) => {
+  const [name, setName] = useState(""); // New state for the city name
   const [recommendations, setRecommendations] = useState("");
   const [highlights, setHighlights] = useState("");
   const [dislikes, setDislikes] = useState("");
 
   useEffect(() => {
     if (cityData) {
+      setName(cityData.name || ""); // Set city name for editing
       setRecommendations(cityData.recommendations || "");
       setHighlights(cityData.highlights || "");
       setDislikes(cityData.dislikes || "");
@@ -18,13 +20,19 @@ const CityModal = ({ isOpen, cityData, onClose, onSave }) => {
   const handleSave = () => {
     const updatedCityData = {
       ...cityData,
+      name, // Updated city name
       recommendations,
       highlights,
       dislikes,
     };
 
-    onSave(updatedCityData); // Save changes to the city
-    onClose(); // Close modal after saving
+    onSave(updatedCityData); // Save changes
+    onClose();
+  };
+
+  const handleDelete = () => {
+    onDelete(cityData.id); // Call the delete function from parent component
+    onClose();
   };
 
   if (!cityData) return null;
@@ -38,7 +46,16 @@ const CityModal = ({ isOpen, cityData, onClose, onSave }) => {
       ariaHideApp={false}
     >
       <div className="modal-container">
-        <h2>City: {cityData.name}</h2>
+        <h2>City: {name}</h2>
+
+        <div className="form-group">
+          <label>City Name:</label>
+          <input
+            type="text"
+            value={name}
+            onChange={(e) => setName(e.target.value)} // Input field for editing name
+          />
+        </div>
 
         <div className="form-group">
           <label>Recommendations:</label>
@@ -70,6 +87,9 @@ const CityModal = ({ isOpen, cityData, onClose, onSave }) => {
         <div className="button-group">
           <button className="save-button" onClick={handleSave}>
             Save Changes
+          </button>
+          <button className="delete-button" onClick={handleDelete}>
+            Delete City
           </button>
           <button className="close-button" onClick={onClose}>
             Close

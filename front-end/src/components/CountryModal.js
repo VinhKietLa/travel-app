@@ -41,10 +41,20 @@ const CountryModal = ({
   };
 
   // Handle removing a city
-  const handleRemoveCity = (index) => {
-    const updatedCities = [...cities];
-    updatedCities.splice(index, 1); // Remove city from list
-    setCities(updatedCities);
+  const handleDeleteCity = (cityId, countryId) => {
+    // Filter out the city with the given ID
+    const updatedCities = cities.filter((city) => city.id !== cityId);
+    setCities(updatedCities); // Update the state with the new list of cities
+
+    // Optionally, you can send a DELETE request to the backend to delete the city from the database
+    axios
+      .delete(`http://localhost:3000/countries/${countryId}/cities/${cityId}`) // Include countryId in the URL
+      .then(() => {
+        console.log(`City with ID ${cityId} deleted successfully.`);
+      })
+      .catch((error) => {
+        console.error("Error deleting city:", error);
+      });
   };
 
   // Open CityModal for editing city details
@@ -191,6 +201,7 @@ const CountryModal = ({
           cityData={selectedCity} // Pass the correct prop name
           onClose={handleCityModalClose}
           onSave={handleSaveCity} // Handle save city data
+          onDelete={(cityId) => handleDeleteCity(cityId)}
         />
       )}
     </Modal>
