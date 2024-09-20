@@ -101,7 +101,7 @@ const CountryModal = ({
   // Retained toggleCountryVisitStatus function
   const toggleCountryVisitStatus = (country) => {
     const updatedStatus = !country.visited;
-
+    console.log(country.id);
     axios
       .put(`http://localhost:3000/countries/${country.id}`, {
         id: country.id, // Include the ID in the payload
