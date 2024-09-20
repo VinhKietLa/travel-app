@@ -26,17 +26,29 @@ const CountryModal = ({
   // Handle adding a new city
   const handleAddCity = () => {
     if (newCityName.trim() !== "") {
-      setCities([
-        ...cities,
-        {
-          id: null,
-          name: newCityName,
-          recommendations: "",
-          highlights: "",
-          dislikes: "",
-        },
-      ]);
-      setNewCityName("");
+      // Create a new city object
+      const newCity = {
+        name: newCityName,
+        recommendations: "",
+        highlights: "",
+        dislikes: "",
+        country_id: countryData.id, // Associate the new city with the correct country
+      };
+
+      // Send POST request to save the new city immediately to the backend
+      axios
+        .post(
+          `http://localhost:3000/countries/${countryData.id}/cities`,
+          newCity
+        )
+        .then((response) => {
+          // Add the newly saved city to the local state after receiving the response
+          setCities([...cities, response.data]);
+          setNewCityName(""); // Clear the input field after adding the city
+        })
+        .catch((error) => {
+          console.error("Error adding new city:", error);
+        });
     }
   };
 
@@ -77,37 +89,37 @@ const CountryModal = ({
     setCities(updatedCities); // Update the state with the new city data
   };
 
-  const handleSaveChanges = () => {
-    const updatedCountryData = {
-      id: countryData.id, // Make sure the country ID is sent
-      visited: countryData.visited, // Keep the current visited status
-      cities_attributes: cities.map((city) => ({
-        id: city.id,
-        name: city.name,
-        recommendations: city.recommendations,
-        highlights: city.highlights,
-        dislikes: city.dislikes,
-      })),
-    };
+  // const handleSaveChanges = () => {
+  //   const updatedCountryData = {
+  //     id: countryData.id, // Make sure the country ID is sent
+  //     visited: countryData.visited, // Keep the current visited status
+  //     cities_attributes: cities.map((city) => ({
+  //       id: city.id,
+  //       name: city.name,
+  //       recommendations: city.recommendations,
+  //       highlights: city.highlights,
+  //       dislikes: city.dislikes,
+  //     })),
+  //   };
 
-    axios
-      .put(
-        `http://localhost:3000/countries/${countryData.id}`, // Ensure the correct country ID is used in the URL
-        updatedCountryData
-      )
-      .then((response) => {
-        const updatedCountry = response.data;
-        setCountriesData(
-          countriesData.map((c) =>
-            c.id === updatedCountry.id ? updatedCountry : c
-          )
-        );
-        onClose();
-      })
-      .catch((error) => {
-        console.error("Error updating country information:", error);
-      });
-  };
+  //   axios
+  //     .put(
+  //       `http://localhost:3000/countries/${countryData.id}`, // Ensure the correct country ID is used in the URL
+  //       updatedCountryData
+  //     )
+  //     .then((response) => {
+  //       const updatedCountry = response.data;
+  //       setCountriesData(
+  //         countriesData.map((c) =>
+  //           c.id === updatedCountry.id ? updatedCountry : c
+  //         )
+  //       );
+  //       onClose();
+  //     })
+  //     .catch((error) => {
+  //       console.error("Error updating country information:", error);
+  //     });
+  // };
 
   // Retained toggleCountryVisitStatus function
   const toggleCountryVisitStatus = (country) => {
@@ -180,9 +192,9 @@ const CountryModal = ({
         </div>
 
         <div className="button-group">
-          <button className="save-button" onClick={handleSaveChanges}>
+          {/* <button className="save-button" onClick={handleSaveChanges}>
             Save Changes
-          </button>
+          </button> */}
           <button
             className="toggle-button"
             onClick={() => toggleCountryVisitStatus(countryData)}

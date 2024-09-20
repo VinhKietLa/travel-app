@@ -30,6 +30,17 @@ class CitiesController < ApplicationController
       end
     end
 
+    def create
+      country = Country.find(params[:country_id]) # Find the country by its ID
+      city = country.cities.build(city_params) # Create a new city associated with the country
+  
+      if city.save
+        render json: city, status: :created
+      else
+        render json: { error: "Failed to create city" }, status: :unprocessable_entity
+      end
+    end
+
     private
 
     # Strong parameters to permit city attributes
