@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 import * as THREE from "three";
 import axios from "axios";
 import CountryModal from "./CountryModal";
+import { v4 as uuidv4 } from "uuid"; // Add this import
 
 const Globe = () => {
   const globeRef = useRef();
@@ -39,7 +40,14 @@ const Globe = () => {
     fetch("/data/countries.geojson")
       .then((response) => response.json())
       .then((geoData) => {
-        setGeoJsonCountries(geoData.features);
+        // Generate IDs for countries that don't have one
+        const featuresWithIds = geoData.features.map((feature) => {
+          if (!feature.properties.id) {
+            feature.properties.id = uuidv4();
+          }
+          return feature;
+        });
+        setGeoJsonCountries(featuresWithIds);
 
         if (!renderer.current && !scene.current && !camera.current) {
           scene.current = new THREE.Scene();
@@ -239,7 +247,7 @@ const Globe = () => {
     };
 
     const handleMouseUp = (event) => {
-      if (!camera.current || !!selectedCountry) return; // Disable if modal is open
+      if (!camera.current || !!selectedCountry) return;
 
       if (!isDragging.current && clickedCountry.current) {
         const foundCountry = countriesData.find(
@@ -255,9 +263,6 @@ const Globe = () => {
             name: clickedCountry.current.name,
             visited: false,
             cities: [],
-            recommendations: "No recommendations available",
-            highlights: "No highlights available",
-            dislikes: "No dislikes available",
           });
         }
       }

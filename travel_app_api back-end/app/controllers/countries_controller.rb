@@ -1,10 +1,11 @@
 class CountriesController < ApplicationController
 
   def create
+    Rails.logger.info "Received params: #{params.inspect}"
     country = Country.new(country_params)
 
     if country.save
-      render json: country, status: :created
+      render json: country.as_json(include: :cities), status: :created
     else
       render json: { errors: country.errors.full_messages }, status: :unprocessable_entity
     end
@@ -28,18 +29,27 @@ class CountriesController < ApplicationController
 
   def update
     country = Country.find_by(id: params[:id])
-
+    
     if country
-      country.update(visited: params[:visited])
-      render json: country
+      if country.update(country_params)
+        render json: country.as_json(include: :cities)
+      else
+        render json: { errors: country.errors.full_messages }, status: :unprocessable_entity
+      end
     else
       render json: { error: "Country not found" }, status: 404
     end
   end
-
+  
   private
-
+  
   def country_params
-    params.require(:country).permit(:name, :visited)
+    params.require(:country).permit(
+      :id, 
+      :name, 
+      :visited, 
+      cities_attributes: [:id, :name, :recommendations, :highlights, :dislikes, :_destroy]
+    )
   end
+  
 end
