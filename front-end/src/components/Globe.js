@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 import * as THREE from "three";
 import axios from "axios";
 import CountryModal from "./CountryModal";
-import { v4 as uuidv4 } from "uuid"; // Add this import
+import { v4 as uuidv4 } from "uuid"; // Helps to assign an ID to countries that don't have one
 
 const Globe = () => {
   const globeRef = useRef();
@@ -40,10 +40,14 @@ const Globe = () => {
     fetch("/data/countries.geojson")
       .then((response) => response.json())
       .then((geoData) => {
+        console.log("GeoJSON Data:", geoData); // Log the entire GeoJSON data
+
         // Generate IDs for countries that don't have one
         const featuresWithIds = geoData.features.map((feature) => {
+          // console.log("Feature properties:", feature.properties); // Log properties of each feature
+
           if (!feature.properties.id) {
-            feature.properties.id = uuidv4();
+            feature.properties.id = uuidv4(); //
           }
           return feature;
         });
@@ -102,14 +106,35 @@ const Globe = () => {
   const mapCountriesToGlobe = (features) => {
     features.forEach((feature) => {
       const { coordinates } = feature.geometry;
-      let countryName = feature.properties.admin.trim().toLowerCase();
 
-      // Check if this country exists in the database (visited countries)
+      // Simplified name extraction with logging
+      const countryName =
+        feature.properties?.name?.trim().toLowerCase() || "unknown";
+
+      // Find the country in the countriesData by name (use more robust matching logic)
       const country = countriesData.find(
         (c) => c.name.trim().toLowerCase() === countryName
       );
 
-      const countryColor = country && country.visited ? 0x00ff00 : 0xff0000; // Green for visited, Red for non-visited
+      // if (!country) {
+      //   console.warn(
+      //     `No match found in backend data for country: ${countryName}`
+      //   );
+      // }
+
+      // If a country is found, use its actual id from countriesData (backend)
+      const countryId = country
+        ? country.id
+        : feature.properties.id || uuidv4(); // Prefer backend ID, fallback to GeoJSON ID
+
+      // Set country color based on whether it's visited or future_travel
+      const countryColor = country
+        ? country.visited
+          ? 0x00ff00 // Green for visited
+          : country.future_travel
+          ? 0xffff00 // Yellow for future travel plans
+          : 0xff0000 // Red for non-visited
+        : 0xff0000; // Default to red if no country data is available
 
       const countryGroup = new THREE.Group();
 
@@ -119,6 +144,7 @@ const Globe = () => {
           countryGroup,
           countryColor,
           country,
+          countryId,
           feature
         );
       } else if (feature.geometry.type === "MultiPolygon") {
@@ -128,6 +154,7 @@ const Globe = () => {
             countryGroup,
             countryColor,
             country,
+            countryId,
             feature
           );
         });
@@ -142,6 +169,7 @@ const Globe = () => {
     countryGroup,
     countryColor,
     country,
+    countryId,
     feature
   ) => {
     polygon.forEach((coordSet) => {
@@ -167,15 +195,18 @@ const Globe = () => {
       });
       const line = new THREE.Line(geometry, material);
 
-      // If country is null, set default non-visited country data
+      // Assign the country name again in case it wasn't passed correctly
+      const countryName = feature?.properties?.name || "Unknown Country";
+
+      // Set userData with proper country data
       line.userData = {
         isCountry: true,
-        countryData: country || {
-          name: feature.properties.admin,
-          visited: false,
+        countryData: {
+          id: countryId,
+          name: countryName,
+          visited: country ? country.visited : false,
         },
       };
-
       countryGroup.add(line);
     });
   };
@@ -250,16 +281,17 @@ const Globe = () => {
       if (!camera.current || !!selectedCountry) return;
 
       if (!isDragging.current && clickedCountry.current) {
+        console.log("Clicked Country ID:", clickedCountry.current.id);
+
         const foundCountry = countriesData.find(
-          (c) =>
-            c.name.trim().toLowerCase() ===
-            clickedCountry.current.name.trim().toLowerCase()
+          (c) => c.id === clickedCountry.current.id // Match by id instead of name for consistency
         );
 
         if (foundCountry) {
-          setSelectedCountry(foundCountry);
+          setSelectedCountry(foundCountry); // Open modal with full country data
         } else {
           setSelectedCountry({
+            id: clickedCountry.current.id, // Ensure id is passed here
             name: clickedCountry.current.name,
             visited: false,
             cities: [],
@@ -297,6 +329,17 @@ const Globe = () => {
 
   return (
     <div>
+      <div className="legend">
+        <div>
+          <span style={{ color: "green" }}>&#9632;</span> Visited
+        </div>
+        <div>
+          <span style={{ color: "yellow" }}>&#9632;</span> Future Travel Plans
+        </div>
+        <div>
+          <span style={{ color: "red" }}>&#9632;</span> Non-Visited
+        </div>
+      </div>
       <div ref={globeRef} />
       <CountryModal
         isOpen={!!selectedCountry}

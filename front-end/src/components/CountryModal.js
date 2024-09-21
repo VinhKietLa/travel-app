@@ -123,12 +123,61 @@ const CountryModal = ({
 
   // Retained toggleCountryVisitStatus function
   const toggleCountryVisitStatus = (country) => {
+    console.log("Country clicked:", country); // Log the entire country object
+    console.log("Country ID:", country.id); // Log the ID of the country clicked
+
     const updatedStatus = !country.visited;
-    console.log(country.id);
+
+    // Check if the country exists in the backend by trying to fetch it
+    axios
+      .get(`http://localhost:3000/countries/${country.id}`)
+      .then(() => {
+        // If the country exists in the backend, update it
+        axios
+          .put(`http://localhost:3000/countries/${country.id}`, {
+            id: country.id,
+            visited: updatedStatus,
+          })
+          .then((response) => {
+            const updatedCountry = response.data;
+            setCountriesData(
+              countriesData.map((c) =>
+                c.id === updatedCountry.id ? updatedCountry : c
+              )
+            );
+            setSelectedCountry(updatedCountry); // Ensure the correct country is selected
+            console.log("Updated country:", updatedCountry); // Log updated country
+          })
+          .catch((error) => {
+            console.error("Error updating country status:", error);
+          });
+      })
+      .catch(() => {
+        // If the country doesn't exist in the backend, create it
+        axios
+          .post(`http://localhost:3000/countries`, {
+            name: country.name,
+            visited: updatedStatus,
+          })
+          .then((response) => {
+            const newCountry = response.data;
+            setCountriesData([...countriesData, newCountry]); // Add the newly created country to the list
+            setSelectedCountry(newCountry); // Select the newly created country
+            console.log("Created new country:", newCountry); // Log newly created country
+          })
+          .catch((error) => {
+            console.error("Error creating new country:", error);
+          });
+      });
+  };
+
+  const toggleFutureTravel = (country) => {
+    const updatedFutureTravel = !country.future_travel; // Toggle the future_travel status
+
     axios
       .put(`http://localhost:3000/countries/${country.id}`, {
-        id: country.id, // Include the ID in the payload
-        visited: updatedStatus,
+        id: country.id,
+        future_travel: updatedFutureTravel,
       })
       .then((response) => {
         const updatedCountry = response.data;
@@ -137,10 +186,10 @@ const CountryModal = ({
             c.id === updatedCountry.id ? updatedCountry : c
           )
         );
-        setSelectedCountry(updatedCountry);
+        setSelectedCountry(updatedCountry); // Update the modal to reflect the new state
       })
       .catch((error) => {
-        console.error("Error updating country status:", error);
+        console.error("Error updating future travel status:", error);
       });
   };
 
@@ -201,6 +250,15 @@ const CountryModal = ({
           >
             {countryData.visited ? "Mark as Non-Visited" : "Mark as Visited"}
           </button>
+          <button
+            className="next-destination-button"
+            onClick={() => toggleFutureTravel(countryData)}
+          >
+            {countryData.future_travel
+              ? "Unmark as Next Destination"
+              : "Mark as Next Destination"}
+          </button>
+
           <button className="close-button" onClick={onClose}>
             Close
           </button>
