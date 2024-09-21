@@ -60,7 +60,7 @@ const CityModal = ({ isOpen, cityData, onClose, onSave, onDelete }) => {
       ariaHideApp={false}
     >
       <div className="modal-container">
-        <h2>City: {name}</h2>
+        <h2>{name}</h2>
 
         <div className="form-group">
           <label>City Name:</label>

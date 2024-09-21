@@ -103,6 +103,29 @@ const Globe = () => {
     }
   }, [geoJsonCountries, countriesData]);
 
+  // **Add zoom functionality using mouse wheel scroll**
+  useEffect(() => {
+    const handleZoom = (event) => {
+      if (!camera.current) return;
+
+      // Zoom in or out by adjusting the camera's z position
+      const zoomFactor = 1.1;
+      if (event.deltaY > 0) {
+        // Zoom out
+        camera.current.position.z *= zoomFactor;
+      } else {
+        // Zoom in
+        camera.current.position.z /= zoomFactor;
+      }
+    };
+
+    window.addEventListener("wheel", handleZoom); // Listen to wheel events for zoom
+
+    return () => {
+      window.removeEventListener("wheel", handleZoom); // Cleanup event listener
+    };
+  }, []);
+
   const mapCountriesToGlobe = (features) => {
     features.forEach((feature) => {
       const { coordinates } = feature.geometry;

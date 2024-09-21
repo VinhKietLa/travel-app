@@ -221,7 +221,7 @@ const CountryModal = ({
               />
             </div>
             <div className="city-details">
-              <h3 className="clickable-city">City: {city.name}</h3>
+              <h3 className="clickable-city">{city.name}</h3>
               <p>Click to edit details</p>
             </div>
           </div>
