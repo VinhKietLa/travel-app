@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2024_09_18_155312) do
+ActiveRecord::Schema[7.1].define(version: 2024_09_21_132246) do
   create_table "cities", force: :cascade do |t|
     t.string "name"
     t.integer "country_id", null: false
@@ -28,6 +28,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_09_18_155312) do
     t.boolean "visited"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.boolean "future_travel", default: false
   end
 
   add_foreign_key "cities", "countries"

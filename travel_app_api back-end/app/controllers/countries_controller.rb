@@ -28,6 +28,9 @@ class CountriesController < ApplicationController
   end
 
   def update
+
+    Rails.logger.info "Update request for country with ID: #{params[:id]} and params: #{params.inspect}"
+
     country = Country.find_by(id: params[:id])
     
     if country
@@ -48,6 +51,7 @@ class CountriesController < ApplicationController
       :id, 
       :name, 
       :visited, 
+      :future_travel, 
       cities_attributes: [:id, :name, :recommendations, :highlights, :dislikes, :_destroy]
     )
   end
