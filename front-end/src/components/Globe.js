@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import Globe from "globe.gl";
 import CountryModal from "./CountryModal";
+import DraggableLegend from "./DraggableLegend";
 
 const GlobeComponent = () => {
   const globeRef = useRef(null);
@@ -62,6 +63,7 @@ const GlobeComponent = () => {
   return (
     <div style={{ position: "relative" }}>
       <div ref={globeRef} style={{ height: "600px", width: "100%" }}></div>
+
       {hoveredCountry && (
         <div
           style={{
@@ -86,29 +88,28 @@ const GlobeComponent = () => {
         />
       )}
 
-      {/* Optional Legend */}
-      <div
-        style={{
-          position: "absolute",
-          bottom: "20px",
-          left: "20px",
-          padding: "10px",
-          backgroundColor: "#333",
-          color: "#fff",
-          borderRadius: "5px",
-        }}
-      >
-        <h4>Legend</h4>
-        <p>
-          <span style={{ color: "green" }}>●</span> Visited
-        </p>
-        <p>
-          <span style={{ color: "yellow" }}>●</span> Wish to visit next
-        </p>
-        <p>
-          <span style={{ color: "red" }}>●</span> Haven't visited
-        </p>
-      </div>
+      {/* Draggable Legend */}
+      <DraggableLegend>
+        <div
+          style={{
+            backgroundColor: "#333",
+            color: "#fff",
+            padding: "10px",
+            borderRadius: "5px",
+          }}
+        >
+          <h4>Legend</h4>
+          <p>
+            <span style={{ color: "green" }}>●</span> Visited
+          </p>
+          <p>
+            <span style={{ color: "yellow" }}>●</span> Wish to visit next
+          </p>
+          <p>
+            <span style={{ color: "red" }}>●</span> Haven't visited
+          </p>
+        </div>
+      </DraggableLegend>
     </div>
   );
 };
