@@ -1,13 +1,13 @@
 import React, { useEffect, useRef, useState } from "react";
 import Globe from "globe.gl";
-import CountryModal from "./CountryModal"; // Assuming this is your existing modal component
+import CountryModal from "./CountryModal";
 
 const GlobeComponent = () => {
   const globeRef = useRef(null);
-  const [selectedCountry, setSelectedCountry] = useState(null); // To track selected country
+  const [selectedCountry, setSelectedCountry] = useState(null);
+  const [hoveredCountry, setHoveredCountry] = useState(null);
 
   useEffect(() => {
-    // Initialize globe with a natural Earth texture
     const globe = Globe()(globeRef.current)
       .globeImageUrl(
         "https://unpkg.com/three-globe/example/img/earth-blue-marble.jpg"
@@ -15,9 +15,8 @@ const GlobeComponent = () => {
       .bumpImageUrl(
         "https://unpkg.com/three-globe/example/img/earth-topology.png"
       )
-      .backgroundColor("#000"); // Black background for contrast
+      .backgroundColor("#000");
 
-    // Fetch a GeoJSON for country boundaries
     fetch(
       "https://raw.githubusercontent.com/holtzy/D3-graph-gallery/master/DATA/world.geojson"
     )
@@ -25,15 +24,17 @@ const GlobeComponent = () => {
       .then((geojson) => {
         globe
           .polygonsData(geojson.features)
-          .polygonAltitude(0.01) // Slightly raise polygons to avoid clipping with texture
-          .polygonCapColor(() => "rgba(255, 255, 255, 0.3)") // Semi-transparent white fill
-          .polygonStrokeColor(() => "#111"); // Dark borders
+          .polygonAltitude(0.01)
+          .polygonCapColor(() => "rgba(255, 255, 255, 0.3)")
+          .polygonStrokeColor(() => "#111")
+          .onPolygonHover((hovered) => {
+            setHoveredCountry(hovered ? hovered.properties.name : null);
+          });
 
-        // Handle country click
         globe.onPolygonClick((country) => {
           const countryName = country.properties.name;
           console.log(`Clicked on: ${countryName}`);
-          setSelectedCountry(countryName); // Set the clicked country to open the modal
+          setSelectedCountry(countryName);
         });
       })
       .catch((error) => console.error("Error loading GeoJSON:", error));
@@ -42,8 +43,22 @@ const GlobeComponent = () => {
   return (
     <div>
       <div ref={globeRef} style={{ height: "600px", width: "100%" }}></div>
+      {hoveredCountry && (
+        <div
+          style={{
+            position: "absolute",
+            top: "10px",
+            left: "10px",
+            padding: "5px 10px",
+            backgroundColor: "#333",
+            color: "#fff",
+            borderRadius: "5px",
+          }}
+        >
+          {hoveredCountry}
+        </div>
+      )}
 
-      {/* Country Modal */}
       {selectedCountry && (
         <CountryModal
           isOpen={!!selectedCountry}
