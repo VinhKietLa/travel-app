@@ -107,12 +107,26 @@ const GlobeComponent = () => {
       .then((countryData) => {
         if (countryData) {
           // Make sure both `id` and `name` are passed to the modal
-          setSelectedCountry(countryData);
+          setSelectedCountry({
+            ...countryData,
+            onCityAdded: handleCityAdded, // Pass the onCityAdded function
+          });
         }
       })
       .catch((error) => {
         console.error("Error fetching or creating country:", error);
       });
+  };
+
+  const handleCityAdded = (newCity) => {
+    setCityMarkers((prevMarkers) => [
+      ...prevMarkers,
+      {
+        lat: parseFloat(newCity.latitude),
+        lng: parseFloat(newCity.longitude),
+        name: newCity.name,
+      },
+    ]);
   };
 
   return (

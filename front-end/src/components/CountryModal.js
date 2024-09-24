@@ -36,7 +36,6 @@ const CountryModal = ({ isOpen, countryData, onClose }) => {
           // Update the local state with the newly created city from the backend
           setCities([...cities, newCity]);
           setNewCityName(""); // Clear the input field after adding the city
-          setNewCityName(""); // Clear the input field after adding the city
 
           // Notify the parent component to refresh city markers
           if (countryData.onCityAdded) {
