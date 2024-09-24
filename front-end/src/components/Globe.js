@@ -46,19 +46,33 @@ const GlobeComponent = () => {
               return "rgba(255, 255, 255, 0.3)"; // Default color
             }
           })
-          .polygonStrokeColor(() => "#111")
+          .polygonStrokeColor(() => "#111") // Default stroke color
           .onPolygonHover((hovered) => {
+            // Update hovered country without re-rendering globe
             setHoveredCountry(hovered ? hovered.properties.name : null);
+            globe.polygonCapColor((d) => {
+              const countryName = d.properties.name;
+              if (hovered && hovered.properties.name === countryName) {
+                return "rgba(255, 215, 0, 0.8)"; // Gold for hovered country
+              } else if (visitedCountries.includes(countryName)) {
+                return "rgba(0, 255, 0, 0.7)"; // Green for visited
+              } else if (wishToVisitCountries.includes(countryName)) {
+                return "rgba(255, 255, 0, 0.7)"; // Yellow for wish to visit
+              } else if (notVisitedCountries.includes(countryName)) {
+                return "rgba(255, 0, 0, 0.7)"; // Red for haven't visited
+              } else {
+                return "rgba(255, 255, 255, 0.3)"; // Default color
+              }
+            });
+          })
+          .onPolygonClick((country) => {
+            const countryName = country.properties.name;
+            console.log(`Clicked on: ${countryName}`);
+            setSelectedCountry(countryName);
           });
-
-        globe.onPolygonClick((country) => {
-          const countryName = country.properties.name;
-          console.log(`Clicked on: ${countryName}`);
-          setSelectedCountry(countryName);
-        });
       })
       .catch((error) => console.error("Error loading GeoJSON:", error));
-  }, []);
+  }, []); // Only run the initialization once
 
   return (
     <div style={{ position: "relative" }}>
