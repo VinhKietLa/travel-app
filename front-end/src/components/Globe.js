@@ -8,14 +8,24 @@ const GlobeComponent = () => {
   const [selectedCountry, setSelectedCountry] = useState(null);
   const [hoveredCountry, setHoveredCountry] = useState(null);
   const [countriesData, setCountriesData] = useState([]); // Store countries from backend
+  const [cityMarkers, setCityMarkers] = useState([]); // Store city markers
   const globeInstance = useRef(null); // Ref to store the globe instance
 
   useEffect(() => {
-    // Fetch countries from the backend
+    // Fetch countries and cities from the backend
     fetch("http://localhost:3000/countries")
       .then((res) => res.json())
       .then((data) => {
         setCountriesData(data); // Save country data to state
+        // Extract city markers (latitude and longitude)
+        const cities = data.flatMap((country) =>
+          country.cities.map((city) => ({
+            lat: parseFloat(city.latitude),
+            lng: parseFloat(city.longitude),
+            name: city.name,
+          }))
+        );
+        setCityMarkers(cities); // Store city markers
       })
       .catch((error) => console.error("Error fetching countries:", error));
 
@@ -51,7 +61,7 @@ const GlobeComponent = () => {
       .catch((error) => console.error("Error loading GeoJSON:", error));
   }, []); // Empty dependency array to ensure this runs only once on mount
 
-  // When countriesData changes, update the polygon colors
+  // When countriesData changes, update the polygon colors and city markers
   useEffect(() => {
     if (countriesData.length > 0 && globeInstance.current) {
       globeInstance.current.polygonCapColor((d) => {
@@ -69,8 +79,15 @@ const GlobeComponent = () => {
           return "rgba(255, 0, 0, 0.7)"; // Red for haven't visited
         }
       });
+
+      // Add city markers to the globe
+      globeInstance.current
+        .pointsData(cityMarkers)
+        .pointColor(() => "turquoise") // Change color to yellow
+        .pointAltitude(() => 0.05) // Increase the altitude (height) to make it larger
+        .pointRadius(0.5); // Increase radius for larger markers
     }
-  }, [countriesData]); // This effect will only update the colors when countriesData changes
+  }, [countriesData, cityMarkers]); // This effect will only update when countriesData or cityMarkers change
 
   // Handle country click
   const handleCountryClick = (countryName) => {
@@ -89,7 +106,8 @@ const GlobeComponent = () => {
       })
       .then((countryData) => {
         if (countryData) {
-          setSelectedCountry(countryData.name); // Open modal if country found
+          // Make sure both `id` and `name` are passed to the modal
+          setSelectedCountry(countryData);
         }
       })
       .catch((error) => {
@@ -120,7 +138,7 @@ const GlobeComponent = () => {
       {selectedCountry && (
         <CountryModal
           isOpen={!!selectedCountry}
-          countryData={{ name: selectedCountry }}
+          countryData={selectedCountry} // Pass the full selectedCountry object
           onClose={() => setSelectedCountry(null)}
         />
       )}

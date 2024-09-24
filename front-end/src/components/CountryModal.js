@@ -4,34 +4,48 @@ import CityModal from "./CityModal"; // Import CityModal component
 import "./CountryModal.css";
 
 const CountryModal = ({ isOpen, countryData, onClose }) => {
-  const [cities, setCities] = useState([]);
+  const [cities, setCities] = useState([]); // Ensure cities is initialized as an array
   const [newCityName, setNewCityName] = useState(""); // For adding new city
   const [selectedCity, setSelectedCity] = useState(null); // State for selected city modal
   const [showCityModal, setShowCityModal] = useState(false); // State to show CityModal
 
   useEffect(() => {
-    // You can initialize cities based on countryData if needed
     if (countryData) {
-      // Example: You can set default cities for each country if necessary
-      // setCities(initialCitiesForCountry[countryData.name] || []);
+      // Ensure cities is always set as an array
+      setCities(Array.isArray(countryData.cities) ? countryData.cities : []);
     }
   }, [countryData]);
 
-  // Handle adding a new city
+  // Handle adding a new city and saving it to the backend
   const handleAddCity = () => {
-    if (newCityName.trim() !== "") {
-      // Create a new city object
-      const newCity = {
-        id: Date.now(), // Simple ID generation
-        name: newCityName,
-        recommendations: "",
-        highlights: "",
-        dislikes: "",
-      };
+    console.log(countryData);
+    if (newCityName.trim() !== "" && countryData?.id) {
+      // Ensure countryData.id exists
+      fetch(`http://localhost:3000/countries/${countryData.id}/cities`, {
+        // Use the correct country ID
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          city: { name: newCityName }, // Send the city name to the backend
+        }),
+      })
+        .then((response) => response.json())
+        .then((newCity) => {
+          // Update the local state with the newly created city from the backend
+          setCities([...cities, newCity]);
+          setNewCityName(""); // Clear the input field after adding the city
+          setNewCityName(""); // Clear the input field after adding the city
 
-      // Add the new city to the local state
-      setCities([...cities, newCity]);
-      setNewCityName(""); // Clear the input field after adding the city
+          // Notify the parent component to refresh city markers
+          if (countryData.onCityAdded) {
+            countryData.onCityAdded(newCity); // Call the function passed from the parent
+          }
+        })
+        .catch((error) => {
+          console.error("Error adding city:", error);
+        });
     }
   };
 
@@ -71,22 +85,25 @@ const CountryModal = ({ isOpen, countryData, onClose }) => {
       ariaHideApp={false}
     >
       <div className="modal-container">
-        {/* Access the 'name' property of the passed countryData */}
         <h2>{countryData.name || "No country selected"}</h2>
 
         {/* List of Cities */}
-        {cities.map((city) => (
-          <div
-            key={city.id}
-            className="city-card"
-            onClick={() => handleCityClick(city)}
-          >
-            <div className="city-details">
-              <h3 className="clickable-city">{city.name}</h3>
-              <p>Click to edit details</p>
+        {cities.length > 0 ? (
+          cities.map((city, index) => (
+            <div
+              key={city.id || index} // Ensure a unique key, fallback to index if no id
+              className="city-card"
+              onClick={() => handleCityClick(city)}
+            >
+              <div className="city-details">
+                <h3 className="clickable-city">{city.name}</h3>
+                <p>Click to edit details</p>
+              </div>
             </div>
-          </div>
-        ))}
+          ))
+        ) : (
+          <p>No cities added yet</p>
+        )}
 
         {/* Form to Add New City */}
         <div className="add-city-section">
