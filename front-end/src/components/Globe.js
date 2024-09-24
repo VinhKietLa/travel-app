@@ -7,14 +7,20 @@ const GlobeComponent = () => {
   const globeRef = useRef(null);
   const [selectedCountry, setSelectedCountry] = useState(null);
   const [hoveredCountry, setHoveredCountry] = useState(null);
-
-  // Example lists of countries
-  const visitedCountries = ["Australia", "Canada", "France"];
-  const wishToVisitCountries = ["Japan", "Brazil"];
-  const notVisitedCountries = ["United States", "Germany"];
+  const [countriesData, setCountriesData] = useState([]); // Store countries from backend
+  const globeInstance = useRef(null); // Ref to store the globe instance
 
   useEffect(() => {
-    const globe = Globe()(globeRef.current)
+    // Fetch countries from the backend
+    fetch("http://localhost:3000/countries")
+      .then((res) => res.json())
+      .then((data) => {
+        setCountriesData(data); // Save country data to state
+      })
+      .catch((error) => console.error("Error fetching countries:", error));
+
+    // Initialize the globe only once
+    globeInstance.current = Globe()(globeRef.current)
       .globeImageUrl(
         "https://unpkg.com/three-globe/example/img/earth-blue-marble.jpg"
       )
@@ -29,50 +35,67 @@ const GlobeComponent = () => {
     )
       .then((res) => res.json())
       .then((geojson) => {
-        globe
+        globeInstance.current
           .polygonsData(geojson.features)
           .polygonAltitude(0.01)
-          .polygonCapColor((d) => {
-            const countryName = d.properties.name;
-
-            // Assign color based on category
-            if (visitedCountries.includes(countryName)) {
-              return "rgba(0, 255, 0, 0.7)"; // Green for visited
-            } else if (wishToVisitCountries.includes(countryName)) {
-              return "rgba(255, 255, 0, 0.7)"; // Yellow for wish to visit
-            } else if (notVisitedCountries.includes(countryName)) {
-              return "rgba(255, 0, 0, 0.7)"; // Red for haven't visited
-            } else {
-              return "rgba(255, 255, 255, 0.3)"; // Default color
-            }
-          })
-          .polygonStrokeColor(() => "#111") // Default stroke color
+          .polygonStrokeColor(() => "#111")
           .onPolygonHover((hovered) => {
-            // Update hovered country without re-rendering globe
             setHoveredCountry(hovered ? hovered.properties.name : null);
-            globe.polygonCapColor((d) => {
-              const countryName = d.properties.name;
-              if (hovered && hovered.properties.name === countryName) {
-                return "rgba(255, 215, 0, 0.8)"; // Gold for hovered country
-              } else if (visitedCountries.includes(countryName)) {
-                return "rgba(0, 255, 0, 0.7)"; // Green for visited
-              } else if (wishToVisitCountries.includes(countryName)) {
-                return "rgba(255, 255, 0, 0.7)"; // Yellow for wish to visit
-              } else if (notVisitedCountries.includes(countryName)) {
-                return "rgba(255, 0, 0, 0.7)"; // Red for haven't visited
-              } else {
-                return "rgba(255, 255, 255, 0.3)"; // Default color
-              }
-            });
           })
           .onPolygonClick((country) => {
             const countryName = country.properties.name;
             console.log(`Clicked on: ${countryName}`);
-            setSelectedCountry(countryName);
+            handleCountryClick(countryName);
           });
       })
       .catch((error) => console.error("Error loading GeoJSON:", error));
-  }, []); // Only run the initialization once
+  }, []); // Empty dependency array to ensure this runs only once on mount
+
+  // When countriesData changes, update the polygon colors
+  useEffect(() => {
+    if (countriesData.length > 0 && globeInstance.current) {
+      globeInstance.current.polygonCapColor((d) => {
+        const countryName = d.properties.name;
+        const country = countriesData.find(
+          (country) => country.name === countryName
+        );
+
+        // Determine color based on backend data
+        if (country?.visited) {
+          return "rgba(0, 255, 0, 0.7)"; // Green for visited
+        } else if (country?.future_travel) {
+          return "rgba(255, 255, 0, 0.7)"; // Yellow for wish to visit
+        } else {
+          return "rgba(255, 0, 0, 0.7)"; // Red for haven't visited
+        }
+      });
+    }
+  }, [countriesData]); // This effect will only update the colors when countriesData changes
+
+  // Handle country click
+  const handleCountryClick = (countryName) => {
+    // First, try to find the country by name
+    fetch(
+      `http://localhost:3000/countries/find_by_name/${encodeURIComponent(
+        countryName
+      )}`
+    )
+      .then((response) => {
+        if (response.ok) {
+          return response.json(); // If found, return the country data
+        } else {
+          throw new Error("Error fetching country");
+        }
+      })
+      .then((countryData) => {
+        if (countryData) {
+          setSelectedCountry(countryData.name); // Open modal if country found
+        }
+      })
+      .catch((error) => {
+        console.error("Error fetching or creating country:", error);
+      });
+  };
 
   return (
     <div style={{ position: "relative" }}>
