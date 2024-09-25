@@ -4,5 +4,7 @@ Rails.application.routes.draw do
   end
 
   get '/countries/find_by_name/:name', to: 'countries#find_by_name'
+  
+  resource :legend_position, only: [:show, :update]
 
 end
