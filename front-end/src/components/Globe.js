@@ -167,7 +167,7 @@ const GlobeComponent = () => {
             borderRadius: "5px",
           }}
         >
-          <h4>Legend</h4>
+          <h4>Country</h4>
           <p>
             <span style={{ color: "green" }}>●</span> Visited
           </p>
@@ -176,6 +176,9 @@ const GlobeComponent = () => {
           </p>
           <p>
             <span style={{ color: "red" }}>●</span> Haven't visited
+          </p>
+          <p>
+            <span style={{ color: "turquoise" }}>●</span> Cities't visited
           </p>
         </div>
       </DraggableLegend>

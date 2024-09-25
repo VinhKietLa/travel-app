@@ -12,7 +12,6 @@ class CitiesController < ApplicationController
 
     def destroy
       city = City.find(params[:id]) # Find the city by its ID
-  
       if city.destroy
         render json: { message: "City deleted successfully" }, status: :ok
       else
