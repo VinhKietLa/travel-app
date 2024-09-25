@@ -10,9 +10,22 @@ class CitiesController < ApplicationController
       render json: @city
     end
 
+    def create
+      country = Country.find(params[:country_id]) # Find the country by its ID
+      city = country.cities.build(city_params) # Create a new city associated with the country
+  
+      if city.save
+        update_country_status(country) # Automatically update the country's visited status
+        render json: city, status: :created
+      else
+        render json: { error: "Failed to create city" }, status: :unprocessable_entity
+      end
+    end
+
     def destroy
       city = City.find(params[:id]) # Find the city by its ID
       if city.destroy
+        update_country_status(city.country) # Automatically update the country's visited status
         render json: { message: "City deleted successfully" }, status: :ok
       else
         render json: { error: "Failed to delete city" }, status: :unprocessable_entity
@@ -29,14 +42,11 @@ class CitiesController < ApplicationController
       end
     end
 
-    def create
-      country = Country.find(params[:country_id]) # Find the country by its ID
-      city = country.cities.build(city_params) # Create a new city associated with the country
-  
-      if city.save
-        render json: city, status: :created
+    def update_country_status(country)
+      if country.cities.any?
+        country.update(visited: true) # Set visited to true (green)
       else
-        render json: { error: "Failed to create city" }, status: :unprocessable_entity
+        country.update(visited: false) # Set visited to false (red)
       end
     end
 

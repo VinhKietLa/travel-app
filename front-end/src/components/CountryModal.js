@@ -3,7 +3,14 @@ import Modal from "react-modal";
 import CityModal from "./CityModal"; // Import CityModal component
 import "./CountryModal.css";
 
-const CountryModal = ({ isOpen, countryData, onClose }) => {
+const CountryModal = ({
+  isOpen,
+  countryData,
+  onClose,
+  onCountryStatusUpdate,
+  onCityDeleted,
+  onCityAdded,
+}) => {
   const [cities, setCities] = useState([]); // Ensure cities is initialized as an array
   const [newCityName, setNewCityName] = useState(""); // For adding new city
   const [selectedCity, setSelectedCity] = useState(null); // State for selected city modal
@@ -38,9 +45,10 @@ const CountryModal = ({ isOpen, countryData, onClose }) => {
           setNewCityName(""); // Clear the input field after adding the city
 
           // Notify the parent component to refresh city markers
-          if (countryData.onCityAdded) {
-            countryData.onCityAdded(newCity); // Call the function passed from the parent
+          if (onCityAdded) {
+            onCityAdded(newCity); // Call the function passed from the parent
           }
+          updateCountryStatus();
         })
         .catch((error) => {
           console.error("Error adding city:", error);
@@ -50,25 +58,23 @@ const CountryModal = ({ isOpen, countryData, onClose }) => {
 
   // Handle removing a city
   const handleDeleteCity = (cityId) => {
-    console.log(cityId);
-
     fetch(
       `http://localhost:3000/countries/${countryData.id}/cities/${cityId}`,
       {
         method: "DELETE",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
       }
     )
-      .then((response) => response.json())
       .then(() => {
         const updatedCities = cities.filter((city) => city.id !== cityId);
-        setCities(updatedCities); // Update the state with the new list of cities
+        setCities(updatedCities); // Update the local state
+
+        // If no cities left, notify parent to update country status
+        if (updatedCities.length === 0) {
+          onCityDeleted(countryData.id);
+        }
       })
-      .catch((error) => {
-        console.error("Error deleting city:", error);
-      });
+      .catch((error) => console.error("Error deleting city:", error));
   };
 
   // Open CityModal for editing city details
@@ -88,6 +94,22 @@ const CountryModal = ({ isOpen, countryData, onClose }) => {
       city.id === updatedCity.id ? updatedCity : city
     );
     setCities(updatedCities); // Update the state with the new city data
+  };
+  // Fetch and update country status
+  const updateCountryStatus = () => {
+    fetch(`http://localhost:3000/countries/${countryData.id}`)
+      .then((response) => response.json())
+      .then((updatedCountry) => {
+        // Call parent method to update country status in the globe
+        if (onCountryStatusUpdate) {
+          console.log("Updating country status:", updatedCountry);
+          onCountryStatusUpdate(updatedCountry);
+        }
+        // Update the local state for the country modal (so it re-renders with updated data)
+      })
+      .catch((error) => {
+        console.error("Error updating country status:", error);
+      });
   };
 
   if (!countryData) return null;
@@ -135,6 +157,9 @@ const CountryModal = ({ isOpen, countryData, onClose }) => {
         </div>
 
         <div className="button-group">
+          <button className="close-button" onClick={onClose}>
+            Mark as next location{" "}
+          </button>
           <button className="close-button" onClick={onClose}>
             Close
           </button>

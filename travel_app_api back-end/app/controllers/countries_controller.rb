@@ -6,6 +6,11 @@ def index
   render json: countries.as_json(include: :cities), status: :ok
 end
 
+def show
+  @country = Country.find(params[:id]) # Find the country by its ID
+    render json: @country, include: :cities # Include associated cities in the response
+  end
+
 
   # GET /countries/find_by_name/:name - find a country by name
   def find_by_name
