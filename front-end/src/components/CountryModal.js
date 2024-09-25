@@ -50,8 +50,25 @@ const CountryModal = ({ isOpen, countryData, onClose }) => {
 
   // Handle removing a city
   const handleDeleteCity = (cityId) => {
-    const updatedCities = cities.filter((city) => city.id !== cityId);
-    setCities(updatedCities); // Update the state with the new list of cities
+    console.log(cityId);
+
+    fetch(
+      `http://localhost:3000/countries/${countryData.id}/cities/${cityId}`,
+      {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }
+    )
+      .then((response) => response.json())
+      .then(() => {
+        const updatedCities = cities.filter((city) => city.id !== cityId);
+        setCities(updatedCities); // Update the state with the new list of cities
+      })
+      .catch((error) => {
+        console.error("Error deleting city:", error);
+      });
   };
 
   // Open CityModal for editing city details
