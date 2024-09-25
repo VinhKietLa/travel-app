@@ -122,7 +122,6 @@ const GlobeComponent = () => {
           // Make sure both `id` and `name` are passed to the modal
           setSelectedCountry({
             ...countryData,
-            onCityAdded: handleCityAdded, // Pass the onCityAdded function
           });
         }
       })
@@ -132,6 +131,22 @@ const GlobeComponent = () => {
   };
 
   const handleCityAdded = (newCity) => {
+    // Fetch the updated country data from the backend after adding a city
+    fetch(`http://localhost:3000/countries/${newCity.country_id}`)
+      .then((response) => response.json())
+      .then((updatedCountry) => {
+        // Update the state with the updated country data
+        setCountriesData((prevCountries) =>
+          prevCountries.map((country) =>
+            country.id === updatedCountry.id
+              ? updatedCountry // Replace the country data with the updated one
+              : country
+          )
+        );
+      })
+      .catch((error) =>
+        console.error("Error fetching updated country:", error)
+      );
     setCityMarkers((prevMarkers) => [
       ...prevMarkers,
       {
@@ -140,6 +155,25 @@ const GlobeComponent = () => {
         name: newCity.name,
       },
     ]);
+  };
+
+  const handleCityDeleted = (countryId) => {
+    // Fetch the updated country data from the backend after deleting a city
+    fetch(`http://localhost:3000/countries/${countryId}`)
+      .then((response) => response.json())
+      .then((updatedCountry) => {
+        // Update the state with the updated country data
+        setCountriesData((prevCountries) =>
+          prevCountries.map((country) =>
+            country.id === updatedCountry.id
+              ? updatedCountry // Replace the country data with the updated one
+              : country
+          )
+        );
+      })
+      .catch((error) =>
+        console.error("Error fetching updated country:", error)
+      );
   };
 
   return (
@@ -167,6 +201,8 @@ const GlobeComponent = () => {
           isOpen={!!selectedCountry}
           countryData={selectedCountry} // Pass the full selectedCountry object
           onClose={() => setSelectedCountry(null)}
+          onCityAdded={handleCityAdded} // Pass handleCityAdded to CountryModal
+          onCityDeleted={handleCityDeleted} // Pass handleCityDeleted to CountryModal
         />
       )}
 
