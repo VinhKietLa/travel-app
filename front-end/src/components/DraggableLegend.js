@@ -12,7 +12,6 @@ const DraggableLegend = ({ children }) => {
     fetch("http://localhost:3000/legend_position")
       .then((res) => res.json())
       .then((data) => {
-        console.log("Legend position fetched:", data);
         setPosition({ x: data.x, y: data.y });
         setIsLoaded(true); // Still allow rendering even if there's an error
       })

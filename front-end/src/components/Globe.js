@@ -135,6 +135,7 @@ const GlobeComponent = () => {
     fetch(`http://localhost:3000/countries/${newCity.country_id}`)
       .then((response) => response.json())
       .then((updatedCountry) => {
+        console.log("Updated country:", updatedCountry);
         // Update the state with the updated country data
         setCountriesData((prevCountries) =>
           prevCountries.map((country) =>
@@ -176,6 +177,30 @@ const GlobeComponent = () => {
       );
   };
 
+  const handleNextLocationToggled = (countryId, newStatus) => {
+    fetch(`http://localhost:3000/countries/${countryId}`, {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        country: { future_travel: newStatus },
+      }),
+    })
+      .then((response) => response.json())
+      .then((updatedCountry) => {
+        // Update countriesData with the updated country status
+        setCountriesData((prevCountries) =>
+          prevCountries.map((country) =>
+            country.id === updatedCountry.id ? updatedCountry : country
+          )
+        );
+      })
+      .catch((error) => {
+        console.error("Error updating country status:", error);
+      });
+  };
+
   return (
     <div style={{ position: "relative" }}>
       <div ref={globeRef} style={{ height: "600px", width: "100%" }}></div>
@@ -203,6 +228,7 @@ const GlobeComponent = () => {
           onClose={() => setSelectedCountry(null)}
           onCityAdded={handleCityAdded} // Pass handleCityAdded to CountryModal
           onCityDeleted={handleCityDeleted} // Pass handleCityDeleted to CountryModal
+          onNextLocation={handleNextLocationToggled} // Pass handleNextLocation to CountryModal
         />
       )}
 
