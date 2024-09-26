@@ -10,16 +10,19 @@ const CountryModal = ({
   onCountryStatusUpdate,
   onCityDeleted,
   onCityAdded,
+  onNextLocation,
 }) => {
   const [cities, setCities] = useState([]); // Ensure cities is initialized as an array
   const [newCityName, setNewCityName] = useState(""); // For adding new city
   const [selectedCity, setSelectedCity] = useState(null); // State for selected city modal
   const [showCityModal, setShowCityModal] = useState(false); // State to show CityModal
+  const [localCountryData, setLocalCountryData] = useState(countryData);
 
   useEffect(() => {
     if (countryData) {
       // Ensure cities is always set as an array
       setCities(Array.isArray(countryData.cities) ? countryData.cities : []);
+      setLocalCountryData(countryData);
     }
   }, [countryData]);
 
@@ -95,6 +98,26 @@ const CountryModal = ({
     );
     setCities(updatedCities); // Update the state with the new city data
   };
+
+  const handleNextLocation = () => {
+    console.log("clicked");
+
+    // Use the functional update form to ensure we're working with the latest state
+    setLocalCountryData((prevData) => {
+      const newStatus = !prevData.future_travel; // Toggle based on the previous state
+      console.log("Toggling next location status:", newStatus);
+
+      if (onNextLocation) {
+        onNextLocation(prevData.id, newStatus); // Notify the parent with the new status
+      }
+
+      // Return the updated data with the toggled future_travel status
+      return { ...prevData, future_travel: newStatus };
+    });
+
+    // No need to manually call updateCountryStatus here, because the state will re-render the component
+  };
+
   // Fetch and update country status
   const updateCountryStatus = () => {
     fetch(`http://localhost:3000/countries/${countryData.id}`)
@@ -105,7 +128,8 @@ const CountryModal = ({
           console.log("Updating country status:", updatedCountry);
           onCountryStatusUpdate(updatedCountry);
         }
-        // Update the local state for the country modal (so it re-renders with updated data)
+        setCities(updatedCountry.cities); // Ensure cities are updated too if necessary
+        countryData.future_travel = updatedCountry.future_travel; // Update the local state for the country modal (so it re-renders with updated data)
       })
       .catch((error) => {
         console.error("Error updating country status:", error);
@@ -157,8 +181,10 @@ const CountryModal = ({
         </div>
 
         <div className="button-group">
-          <button className="close-button" onClick={onClose}>
-            Mark as next location{" "}
+          <button className="close-button" onClick={handleNextLocation}>
+            {localCountryData?.future_travel
+              ? "Unmark as next location"
+              : "Mark as next location"}
           </button>
           <button className="close-button" onClick={onClose}>
             Close
