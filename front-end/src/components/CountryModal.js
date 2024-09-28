@@ -112,27 +112,25 @@ const CountryModal = ({
       // Return the updated data with the toggled future_travel status
       return { ...prevData, future_travel: newStatus };
     });
-
-    // No need to manually call updateCountryStatus here, because the state will re-render the component
   };
 
   // Fetch and update country status
-  const updateCountryStatus = () => {
-    fetch(`http://localhost:3000/countries/${countryData.id}`)
-      .then((response) => response.json())
-      .then((updatedCountry) => {
-        // Call parent method to update country status in the globe
-        if (onCountryStatusUpdate) {
-          onCountryStatusUpdate(updatedCountry);
-        }
-        setCities(updatedCountry.cities); // Ensure cities are updated too if necessary
-        countryData.future_travel = updatedCountry.future_travel; // Update the local state for the country modal (so it re-renders with updated data)
-        setLocalCountryData(updatedCountry); // Update local country data to ensure the UI reflects the changes
-      })
-      .catch((error) => {
-        console.error("Error updating country status:", error);
-      });
-  };
+  // const updateCountryStatus = () => {
+  //   fetch(`http://localhost:3000/countries/${countryData.id}`)
+  //     .then((response) => response.json())
+  //     .then((updatedCountry) => {
+  //       // Call parent method to update country status in the globe
+  //       if (onCountryStatusUpdate) {
+  //         onCountryStatusUpdate(updatedCountry);
+  //       }
+  //       setCities(updatedCountry.cities); // Ensure cities are updated too if necessary
+  //       countryData.future_travel = updatedCountry.future_travel; // Update the local state for the country modal (so it re-renders with updated data)
+  //       setLocalCountryData(updatedCountry); // Update local country data to ensure the UI reflects the changes
+  //     })
+  //     .catch((error) => {
+  //       console.error("Error updating country status:", error);
+  //     });
+  // };
 
   if (!countryData) return null;
 

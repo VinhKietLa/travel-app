@@ -3,7 +3,7 @@ import React, { useState, useEffect } from "react";
 const DraggableLegend = ({ children }) => {
   const [position, setPosition] = useState({ x: 0, y: 0 });
   const [isDragging, setIsDragging] = useState(false);
-  const [offset, setOffset] = useState({ x: 627, y: 29 });
+  const [offset, setOffset] = useState({ x: 0, y: 0 });
   const [hasMoved, setHasMoved] = useState(false); // Flag to track if dragging occurred
   const [isLoaded, setIsLoaded] = useState(false); // New state to track if position is loaded
 

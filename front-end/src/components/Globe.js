@@ -222,7 +222,7 @@ const GlobeComponent = () => {
           position: "absolute",
           top: "10px",
           left: "10px",
-          backgroundColor: "#4A4A4A",
+          backgroundColor: "#333",
           padding: "10px",
           borderRadius: "5px",
           color: "#fff",
