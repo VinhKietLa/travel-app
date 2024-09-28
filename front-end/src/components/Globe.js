@@ -206,15 +206,16 @@ const GlobeComponent = () => {
           style={{
             position: "absolute",
             top: "10px",
-            left: "300px",
-            padding: "5px 100px",
+            left: "50%",
+            transform: "translateX(-50%)",
+            padding: "5px 50px",
             backgroundColor: "#4A4A4A",
             color: "#fff",
             borderRadius: "5px",
             fontSize: "25px",
           }}
         >
-          {hoveredCountry}
+          Hovering Over: {hoveredCountry}
         </div>
       )}
       <div
