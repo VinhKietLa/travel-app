@@ -10,7 +10,6 @@ const GlobeComponent = () => {
   const [countriesData, setCountriesData] = useState([]); // Store countries from backend
   const [cityMarkers, setCityMarkers] = useState([]); // Store city markers
   const globeInstance = useRef(null); // Ref to store the globe instance
-  const [position, setPosition] = useState({ x: 0, y: 0 });
 
   useEffect(() => {
     // Fetch countries and cities from the backend
@@ -89,19 +88,6 @@ const GlobeComponent = () => {
         .pointRadius(0.5); // Increase radius for larger markers
     }
   }, [countriesData, cityMarkers]); // This effect will only update when countriesData or cityMarkers change
-
-  useEffect(() => {
-    // Fetch the saved position from the backend
-    fetch("http://localhost:3000/legend_position")
-      .then((res) => res.json())
-      .then((data) => {
-        setPosition({ x: data.x, y: data.y });
-      })
-      .catch((error) =>
-        console.error("Error fetching legend position:", error)
-      );
-  }, []);
-
   // Handle country click
   const handleCountryClick = (countryName) => {
     // First, try to find the country by name
@@ -211,10 +197,11 @@ const GlobeComponent = () => {
             position: "absolute",
             top: "10px",
             left: "10px",
-            padding: "5px 10px",
+            padding: "5px 100px",
             backgroundColor: "#333",
             color: "#fff",
             borderRadius: "5px",
+            fontSize: "25px",
           }}
         >
           {hoveredCountry}
