@@ -96,6 +96,7 @@ const DraggableLegend = ({ children }) => {
     padding: "10px",
     borderRadius: "5px",
   };
+
   if (!isLoaded) {
     return null; // Don't render anything until position is loaded
   }

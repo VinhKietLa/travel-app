@@ -186,6 +186,19 @@ const GlobeComponent = () => {
         console.error("Error updating country status:", error);
       });
   };
+  const [stats, setStats] = useState({
+    total_countries_visited: 0,
+    total_cities_visited: 0,
+  });
+
+  useEffect(() => {
+    fetch("http://localhost:3000/travel_stats")
+      .then((response) => response.json())
+      .then((data) => {
+        setStats(data);
+      })
+      .catch((error) => console.error("Error fetching travel stats:", error));
+  }, []);
 
   return (
     <div style={{ position: "relative" }}>
@@ -196,7 +209,7 @@ const GlobeComponent = () => {
           style={{
             position: "absolute",
             top: "10px",
-            left: "10px",
+            left: "300px",
             padding: "5px 100px",
             backgroundColor: "#333",
             color: "#fff",
@@ -207,6 +220,20 @@ const GlobeComponent = () => {
           {hoveredCountry}
         </div>
       )}
+      <div
+        style={{
+          position: "absolute",
+          top: "10px",
+          left: "10px",
+          backgroundColor: "#fff",
+          padding: "10px",
+          borderRadius: "5px",
+        }}
+      >
+        <h4>Travel Stats</h4>
+        <p>Total Countries Visited: {stats.total_countries_visited}</p>
+        <p>Total Cities Visited: {stats.total_cities_visited}</p>
+      </div>
 
       {selectedCountry && (
         <CountryModal
