@@ -197,10 +197,11 @@ const GlobeComponent = () => {
             position: "absolute",
             top: "10px",
             left: "10px",
-            padding: "5px 10px",
+            padding: "5px 100px",
             backgroundColor: "#333",
             color: "#fff",
             borderRadius: "5px",
+            fontSize: "25px",
           }}
         >
           {hoveredCountry}

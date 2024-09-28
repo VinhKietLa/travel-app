@@ -54,7 +54,7 @@ class CitiesController < ApplicationController
 
     # Strong parameters to permit city attributes
     def city_params
-      params.require(:city).permit(:name, :recommendations, :highlights, :dislikes)
+      params.require(:city).permit(:name, :recommendations, :highlights, :dislikes, :notes)
     end
 
   end

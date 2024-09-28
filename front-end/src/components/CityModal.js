@@ -7,6 +7,7 @@ const CityModal = ({ isOpen, cityData, onClose, onSave, onDelete }) => {
   const [recommendations, setRecommendations] = useState("");
   const [highlights, setHighlights] = useState("");
   const [dislikes, setDislikes] = useState("");
+  const [notes, setNotes] = useState("");
 
   useEffect(() => {
     if (cityData) {
@@ -14,6 +15,7 @@ const CityModal = ({ isOpen, cityData, onClose, onSave, onDelete }) => {
       setRecommendations(cityData.recommendations || "");
       setHighlights(cityData.highlights || "");
       setDislikes(cityData.dislikes || "");
+      setNotes(cityData.notes || "");
     }
   }, [cityData]);
 
@@ -24,6 +26,7 @@ const CityModal = ({ isOpen, cityData, onClose, onSave, onDelete }) => {
       recommendations,
       highlights,
       dislikes,
+      notes,
     };
 
     // Send the updated city data to the backend
@@ -77,6 +80,7 @@ const CityModal = ({ isOpen, cityData, onClose, onSave, onDelete }) => {
             className="textarea-input"
             value={recommendations}
             onChange={(e) => setRecommendations(e.target.value)}
+            placeholder="Specific places, things to do, or tips."
           />
         </div>
 
@@ -86,6 +90,7 @@ const CityModal = ({ isOpen, cityData, onClose, onSave, onDelete }) => {
             className="textarea-input"
             value={highlights}
             onChange={(e) => setHighlights(e.target.value)}
+            placeholder="Personal favorite moments, experiences, or memories."
           />
         </div>
 
@@ -95,6 +100,16 @@ const CityModal = ({ isOpen, cityData, onClose, onSave, onDelete }) => {
             className="textarea-input"
             value={dislikes}
             onChange={(e) => setDislikes(e.target.value)}
+            placeholder="Places to avoid, things to skip, or tips to avoid."
+          />
+        </div>
+        <div className="form-group">
+          <label>Notes:</label>
+          <textarea
+            className="textarea-input"
+            value={notes}
+            onChange={(e) => setNotes(e.target.value)}
+            placeholder="Any additional notes or thoughts about the city."
           />
         </div>
 
