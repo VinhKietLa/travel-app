@@ -83,9 +83,9 @@ const GlobeComponent = () => {
       // Add city markers to the globe
       globeInstance.current
         .pointsData(cityMarkers)
-        .pointColor(() => "turquoise") // Change color to yellow
-        .pointAltitude(() => 0.05) // Increase the altitude (height) to make it larger
-        .pointRadius(0.5); // Increase radius for larger markers
+        .pointColor(() => "purple") // Change color to yellow
+        .pointAltitude(() => 0.01) // Increase the altitude (height) to make it larger
+        .pointRadius(0.2); // Increase radius for larger markers
     }
   }, [countriesData, cityMarkers]); // This effect will only update when countriesData or cityMarkers change
   // Handle country click
@@ -116,32 +116,29 @@ const GlobeComponent = () => {
       });
   };
 
-  const handleCityAdded = (newCity) => {
-    // Fetch the updated country data from the backend after adding a city
-    fetch(`http://localhost:3000/countries/${newCity.country_id}`)
-      .then((response) => response.json())
-      .then((updatedCountry) => {
-        console.log("Updated country:", updatedCountry);
-        // Update the state with the updated country data
-        setCountriesData((prevCountries) =>
-          prevCountries.map((country) =>
-            country.id === updatedCountry.id
-              ? updatedCountry // Replace the country data with the updated one
-              : country
-          )
-        );
-      })
-      .catch((error) =>
-        console.error("Error fetching updated country:", error)
+  const handleCityAdded = (newCity, updatedCountry) => {
+    // Use the passed `updatedCountry` data
+    if (updatedCountry && updatedCountry.id) {
+      setCountriesData((prevCountries) =>
+        prevCountries.map((country) =>
+          country.id === updatedCountry.id
+            ? updatedCountry // Replace the country with the updated one
+            : country
+        )
       );
-    setCityMarkers((prevMarkers) => [
-      ...prevMarkers,
-      {
-        lat: parseFloat(newCity.latitude),
-        lng: parseFloat(newCity.longitude),
-        name: newCity.name,
-      },
-    ]);
+
+      // Add the new city marker to the globe
+      setCityMarkers((prevMarkers) => [
+        ...prevMarkers,
+        {
+          lat: parseFloat(newCity.latitude),
+          lng: parseFloat(newCity.longitude),
+          name: newCity.name,
+        },
+      ]);
+    } else {
+      console.error("No valid updated country data found.");
+    }
   };
 
   const handleCityDeleted = (countryId) => {
@@ -198,7 +195,7 @@ const GlobeComponent = () => {
         setStats(data);
       })
       .catch((error) => console.error("Error fetching travel stats:", error));
-  }, []);
+  }, [countriesData]);
 
   return (
     <div style={{ position: "relative" }}>
@@ -267,7 +264,7 @@ const GlobeComponent = () => {
             <span style={{ color: "red" }}>●</span> Haven't visited
           </p>
           <p>
-            <span style={{ color: "turquoise" }}>●</span> Cities't visited
+            <span style={{ color: "purple" }}>●</span> Cities visited
           </p>
         </div>
       </DraggableLegend>
