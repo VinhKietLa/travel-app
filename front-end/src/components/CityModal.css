@@ -87,3 +87,45 @@ h2 {
     width: 100%;
   }
 }
+
+/* slider styles */
+
+/* Custom styles for carousel arrows */
+.slick-prev,
+.slick-next {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  display: block !important; /* Ensure the arrows are displayed */
+  width: 40px;
+  height: 40px;
+  font-size: 30px;
+  line-height: 40px;
+  text-align: center;
+  z-index: 999 !important; /* Ensure it's above other elements */
+  cursor: pointer;
+  color: #333 !important; /* Ensure the arrows are visible */
+}
+
+.slick-prev::before,
+.slick-next::before {
+  font-size: 30px !important;
+  opacity: 1 !important; /* Make the arrows visible */
+  color: #333 !important; /* Ensure the arrows are visible */
+}
+
+.slick-prev:hover,
+.slick-next:hover {
+  color: #000 !important;
+}
+
+.slick-prev::before {
+  content: "←" !important; /* Left arrow */
+}
+.slick-next::before {
+  content: "→" !important; /* Right arrow */
+}
+
+.image-container {
+  position: relative;
+}
