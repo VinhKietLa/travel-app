@@ -28,34 +28,35 @@ const CountryModal = ({
 
   // Handle adding a new city and saving it to the backend
   const handleAddCity = () => {
-    console.log(countryData);
-    if (newCityName.trim() !== "" && countryData?.id) {
-      // Ensure countryData.id exists
-      fetch(`http://localhost:3000/countries/${countryData.id}/cities`, {
-        // Use the correct country ID
+    if (newCityName.trim() !== "" && localCountryData?.id) {
+      fetch(`http://localhost:3000/countries/${localCountryData.id}/cities`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          city: { name: newCityName }, // Send the city name to the backend
+          city: { name: newCityName },
         }),
       })
         .then((response) => response.json())
         .then((newCity) => {
-          // Update the local state with the newly created city from the backend
           setCities([...cities, newCity]);
-          setNewCityName(""); // Clear the input field after adding the city
+          setNewCityName(""); // Clear the input field
 
-          // Notify the parent component to refresh city markers
-          if (onCityAdded) {
-            onCityAdded(newCity); // Call the function passed from the parent
-          }
-          updateCountryStatus();
+          // Fetch the updated country data after adding the new city
+          fetch(`http://localhost:3000/countries/${localCountryData.id}`)
+            .then((response) => response.json())
+            .then((updatedCountry) => {
+              // Notify parent of the updated country data, including the new city
+              if (onCityAdded) {
+                onCityAdded(newCity, updatedCountry); // Pass the updated country data
+              }
+            })
+            .catch((error) =>
+              console.error("Error fetching updated country:", error)
+            );
         })
-        .catch((error) => {
-          console.error("Error adding city:", error);
-        });
+        .catch((error) => console.error("Error adding city:", error));
     }
   };
 
@@ -100,12 +101,9 @@ const CountryModal = ({
   };
 
   const handleNextLocation = () => {
-    console.log("clicked");
-
     // Use the functional update form to ensure we're working with the latest state
     setLocalCountryData((prevData) => {
       const newStatus = !prevData.future_travel; // Toggle based on the previous state
-      console.log("Toggling next location status:", newStatus);
 
       if (onNextLocation) {
         onNextLocation(prevData.id, newStatus); // Notify the parent with the new status
@@ -125,11 +123,11 @@ const CountryModal = ({
       .then((updatedCountry) => {
         // Call parent method to update country status in the globe
         if (onCountryStatusUpdate) {
-          console.log("Updating country status:", updatedCountry);
           onCountryStatusUpdate(updatedCountry);
         }
         setCities(updatedCountry.cities); // Ensure cities are updated too if necessary
         countryData.future_travel = updatedCountry.future_travel; // Update the local state for the country modal (so it re-renders with updated data)
+        setLocalCountryData(updatedCountry); // Update local country data to ensure the UI reflects the changes
       })
       .catch((error) => {
         console.error("Error updating country status:", error);
