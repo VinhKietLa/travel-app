@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import Modal from "react-modal";
-import CityModal from "./CityModal"; // Import CityModal component
+import CityModal from "./CityModal";
 import "./CountryModal.css";
 
 const CountryModal = ({
@@ -145,7 +145,10 @@ const CountryModal = ({
       ariaHideApp={false}
       style={{
         content: {
-          backgroundColor: "#FFFFFF",
+          backgroundColor: "#2C2C2E",
+        },
+        overlay: {
+          backgroundColor: "transparent",
         },
       }}
     >

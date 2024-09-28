@@ -125,8 +125,16 @@ const CityModal = ({ isOpen, cityData, onClose, onSave, onDelete }) => {
       contentLabel="City Details"
       shouldCloseOnOverlayClick={true}
       ariaHideApp={false}
+      style={{
+        content: {
+          backgroundColor: "#2C2C2E",
+        },
+        overlay: {
+          backgroundColor: "transparent",
+        },
+      }}
     >
-      <div className="modal-container">
+      <div className="city-modal-container">
         <h2>{name}</h2>
 
         <div className="form-group">
@@ -135,13 +143,14 @@ const CityModal = ({ isOpen, cityData, onClose, onSave, onDelete }) => {
             type="text"
             value={name}
             onChange={(e) => setName(e.target.value)}
+            className="edit-city-name-input"
           />
         </div>
 
         <div className="form-group">
           <label>Recommendations:</label>
           <textarea
-            className="textarea-input"
+            className="city-textarea-input"
             value={recommendations}
             onChange={(e) => setRecommendations(e.target.value)}
             placeholder="Specific places, things to do, or tips."
@@ -151,7 +160,7 @@ const CityModal = ({ isOpen, cityData, onClose, onSave, onDelete }) => {
         <div className="form-group">
           <label>Highlights:</label>
           <textarea
-            className="textarea-input"
+            className="city-textarea-input"
             value={highlights}
             onChange={(e) => setHighlights(e.target.value)}
             placeholder="Personal favorite moments, experiences, or memories."
@@ -161,7 +170,7 @@ const CityModal = ({ isOpen, cityData, onClose, onSave, onDelete }) => {
         <div className="form-group">
           <label>Dislikes:</label>
           <textarea
-            className="textarea-input"
+            className="city-textarea-input"
             value={dislikes}
             onChange={(e) => setDislikes(e.target.value)}
             placeholder="Places to avoid, things to skip, or tips to avoid."
@@ -170,7 +179,7 @@ const CityModal = ({ isOpen, cityData, onClose, onSave, onDelete }) => {
         <div className="form-group">
           <label>Notes:</label>
           <textarea
-            className="textarea-input"
+            className="city-textarea-input"
             value={notes}
             onChange={(e) => setNotes(e.target.value)}
             placeholder="Any additional notes or thoughts about the city."
@@ -200,7 +209,7 @@ const CityModal = ({ isOpen, cityData, onClose, onSave, onDelete }) => {
               <div key={index} className="image-container">
                 <img
                   src={`http://localhost:3000${url}`}
-                  alt={`City Image ${index}`}
+                  alt={`City ${index}`}
                   style={{
                     width: "100%",
                     height: "300px",
