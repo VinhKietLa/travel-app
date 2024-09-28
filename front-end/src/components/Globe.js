@@ -72,18 +72,18 @@ const GlobeComponent = () => {
 
         // Determine color based on backend data
         if (country?.visited) {
-          return "rgba(0, 255, 0, 0.7)"; // Green for visited
+          return "rgba(46, 204, 113, 1)"; // Green for visited
         } else if (country?.future_travel) {
-          return "rgba(255, 255, 0, 0.7)"; // Yellow for wish to visit
+          return "rgba(241, 196, 15, 1)"; // Yellow for wish to visit
         } else {
-          return "rgba(255, 0, 0, 0.7)"; // Red for haven't visited
+          return "rgba(231, 76, 60, 1)"; // Red for haven't visited
         }
       });
 
       // Add city markers to the globe
       globeInstance.current
         .pointsData(cityMarkers)
-        .pointColor(() => "purple") // Change color to yellow
+        .pointColor(() => "#2980B9")
         .pointAltitude(() => 0.01) // Increase the altitude (height) to make it larger
         .pointRadius(0.2); // Increase radius for larger markers
     }
@@ -208,7 +208,7 @@ const GlobeComponent = () => {
             top: "10px",
             left: "300px",
             padding: "5px 100px",
-            backgroundColor: "#333",
+            backgroundColor: "#4A4A4A",
             color: "#fff",
             borderRadius: "5px",
             fontSize: "25px",
@@ -222,9 +222,10 @@ const GlobeComponent = () => {
           position: "absolute",
           top: "10px",
           left: "10px",
-          backgroundColor: "#fff",
+          backgroundColor: "#4A4A4A",
           padding: "10px",
           borderRadius: "5px",
+          color: "#fff",
         }}
       >
         <h4>Travel Stats</h4>
@@ -255,16 +256,18 @@ const GlobeComponent = () => {
         >
           <h4>Country</h4>
           <p>
-            <span style={{ color: "green" }}>●</span> Visited
+            <span style={{ color: "rgba(46, 204, 113, 1" }}>●</span> Visited
           </p>
           <p>
-            <span style={{ color: "yellow" }}>●</span> Wish to visit next
+            <span style={{ color: "rgba(241, 196, 15, 1)" }}>●</span> Wish to
+            visit next
           </p>
           <p>
-            <span style={{ color: "red" }}>●</span> Haven't visited
+            <span style={{ color: "rgba(231, 76, 60, 1)" }}>●</span> Haven't
+            visited
           </p>
           <p>
-            <span style={{ color: "purple" }}>●</span> Cities visited
+            <span style={{ color: "#2980B9" }}>●</span> Cities visited
           </p>
         </div>
       </DraggableLegend>

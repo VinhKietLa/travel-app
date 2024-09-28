@@ -179,7 +179,7 @@ const CountryModal = ({
         </div>
 
         <div className="button-group">
-          <button className="close-button" onClick={handleNextLocation}>
+          <button className="toggle-button" onClick={handleNextLocation}>
             {localCountryData?.future_travel
               ? "Unmark as next location"
               : "Mark as next location"}

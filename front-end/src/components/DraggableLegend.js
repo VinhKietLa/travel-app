@@ -92,7 +92,7 @@ const DraggableLegend = ({ children }) => {
     left: `${position.x}px`,
     top: `${position.y}px`,
     cursor: isDragging ? "grabbing" : "grab",
-    backgroundColor: "lightgray",
+    backgroundColor: "#4A4A4A",
     padding: "10px",
     borderRadius: "5px",
   };
