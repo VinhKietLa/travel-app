@@ -143,6 +143,11 @@ const CountryModal = ({
       contentLabel="Country Details"
       shouldCloseOnOverlayClick={true}
       ariaHideApp={false}
+      style={{
+        content: {
+          backgroundColor: "#FFFFFF",
+        },
+      }}
     >
       <div className="modal-container">
         <h2>{countryData.name || "No country selected"}</h2>
@@ -172,6 +177,7 @@ const CountryModal = ({
             placeholder="New City Name"
             value={newCityName}
             onChange={(e) => setNewCityName(e.target.value)}
+            className="add-city-input"
           />
           <button className="add-button" onClick={handleAddCity}>
             Add City

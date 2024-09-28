@@ -4,6 +4,7 @@
   padding: 20px;
   max-width: 600px;
   margin: 0 auto;
+  background-color: #f4f4f4;
 }
 
 h2 {
@@ -37,7 +38,7 @@ label {
   margin-top: 20px;
 }
 
-.save-button,
+.add-button,
 .toggle-button,
 .close-button {
   padding: 10px 15px;
@@ -45,16 +46,26 @@ label {
   border: none;
   border-radius: 5px;
   cursor: pointer;
+  color: white;
 }
 
 .toggle-button {
   background-color: #f39c12;
-  color: white;
 }
 
 .close-button {
-  background-color: #e74c3c;
-  color: white;
+  background-color: #ff6f61;
+}
+.add-button {
+  background-color: #28a745;
+  margin-left: 10px;
+}
+.add-city-input {
+  padding: 10px;
+  font-size: 14px;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+  resize: none;
 }
 
 button:hover {
