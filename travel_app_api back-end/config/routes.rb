@@ -7,5 +7,7 @@ Rails.application.routes.draw do
   get 'travel_stats', to: 'travel_stats#index'
 
   resource :legend_position, only: [:show, :update]
-
+  direct :rails_blob do |blob, options|
+    route_for(:rails_blob, blob, options)
+  end
 end

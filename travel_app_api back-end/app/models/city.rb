@@ -3,6 +3,7 @@ require 'httparty'
 class City < ApplicationRecord
   belongs_to :country
   validates :name, presence: true
+  has_many_attached :images
 
   before_save :geocode_city, if: -> { latitude.blank? || longitude.blank? }
 

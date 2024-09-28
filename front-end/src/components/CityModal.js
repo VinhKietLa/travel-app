@@ -1,55 +1,119 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import Modal from "react-modal";
 import "./CityModal.css"; // Optional: Add your own styles
 import axios from "axios";
+import "slick-carousel/slick/slick.css";
+import "slick-carousel/slick/slick-theme.css";
+import Slider from "react-slick"; // Import Slider from react-slick
+
 const CityModal = ({ isOpen, cityData, onClose, onSave, onDelete }) => {
-  const [name, setName] = useState(""); // New state for the city name
+  const [name, setName] = useState("");
   const [recommendations, setRecommendations] = useState("");
   const [highlights, setHighlights] = useState("");
   const [dislikes, setDislikes] = useState("");
   const [notes, setNotes] = useState("");
+  const [selectedFiles, setSelectedFiles] = useState([]);
+  const [uploadedImages, setUploadedImages] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const fileInputRef = useRef(null);
 
   useEffect(() => {
-    if (cityData) {
-      setName(cityData.name || ""); // Set city name for editing
-      setRecommendations(cityData.recommendations || "");
-      setHighlights(cityData.highlights || "");
-      setDislikes(cityData.dislikes || "");
-      setNotes(cityData.notes || "");
+    if (isOpen && cityData) {
+      axios
+        .get(
+          `http://localhost:3000/countries/${cityData.country_id}/cities/${cityData.id}`
+        )
+        .then((response) => {
+          const updatedCity = response.data;
+          setName(updatedCity.name || "");
+          setRecommendations(updatedCity.recommendations || "");
+          setHighlights(updatedCity.highlights || "");
+          setDislikes(updatedCity.dislikes || "");
+          setNotes(updatedCity.notes || "");
+          setUploadedImages(updatedCity.images_urls || []);
+        })
+        .catch((error) => {
+          console.error("Error fetching city data:", error);
+        });
     }
-  }, [cityData]);
+  }, [isOpen, cityData]);
+
+  const handleFileChange = (event) => {
+    setSelectedFiles(event.target.files);
+  };
+
+  const handleFileUpload = async () => {
+    setLoading(true);
+    const formData = new FormData();
+    for (let i = 0; i < selectedFiles.length; i++) {
+      formData.append("city[images][]", selectedFiles[i]);
+    }
+
+    try {
+      const response = await fetch(
+        `http://localhost:3000/countries/${cityData.country_id}/cities/${cityData.id}`,
+        {
+          method: "PATCH",
+          body: formData,
+        }
+      );
+      const updatedCity = await response.json();
+
+      setUploadedImages((prevImages) => [
+        ...prevImages,
+        ...updatedCity.images_urls,
+      ]);
+
+      setSelectedFiles([]);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
+    } catch (error) {
+      console.error("Error uploading images:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleSave = () => {
     const updatedCityData = {
       ...cityData,
-      name, // Updated city name
+      name,
       recommendations,
       highlights,
       dislikes,
       notes,
     };
 
-    // Send the updated city data to the backend
     axios
       .put(
         `http://localhost:3000/countries/${cityData.country_id}/cities/${cityData.id}`,
         updatedCityData
-      ) // Ensure the correct country and city IDs are used
+      )
       .then((response) => {
-        onSave(response.data); // Update the city data in the parent component (CountryModal)
-        onClose(); // Close the modal after saving
+        onSave(response.data);
+        onClose();
       })
       .catch((error) => {
         console.error("Error updating city information:", error);
       });
 
-    onSave(updatedCityData); // Save changes
+    onSave(updatedCityData);
     onClose();
   };
 
   const handleDelete = () => {
-    onDelete(cityData.id); // Call the delete function from parent component
+    onDelete(cityData.id);
     onClose();
+  };
+
+  const settings = {
+    dots: true,
+    infinite: true,
+    speed: 500,
+    slidesToShow: 1,
+    slidesToScroll: 1,
+    arrows: true,
   };
 
   if (!cityData) return null;
@@ -70,7 +134,7 @@ const CityModal = ({ isOpen, cityData, onClose, onSave, onDelete }) => {
           <input
             type="text"
             value={name}
-            onChange={(e) => setName(e.target.value)} // Input field for editing name
+            onChange={(e) => setName(e.target.value)}
           />
         </div>
 
@@ -112,6 +176,44 @@ const CityModal = ({ isOpen, cityData, onClose, onSave, onDelete }) => {
             placeholder="Any additional notes or thoughts about the city."
           />
         </div>
+
+        <div className="form-group">
+          <label>Upload Images:</label>
+          <input
+            type="file"
+            multiple
+            onChange={handleFileChange}
+            ref={fileInputRef}
+          />
+          <button
+            className="upload-button"
+            onClick={handleFileUpload}
+            disabled={selectedFiles.length === 0 || loading}
+          >
+            {loading ? "Uploading..." : "Upload Images"}
+          </button>
+        </div>
+
+        {uploadedImages.length > 0 ? (
+          <Slider {...settings}>
+            {uploadedImages.map((url, index) => (
+              <div key={index} className="image-container">
+                <img
+                  src={`http://localhost:3000${url}`}
+                  alt={`City Image ${index}`}
+                  style={{
+                    width: "100%",
+                    height: "300px",
+                    objectFit: "contain",
+                    marginBottom: "10px",
+                  }}
+                />
+              </div>
+            ))}
+          </Slider>
+        ) : (
+          <p>No images available.</p>
+        )}
 
         <div className="button-group">
           <button className="save-button" onClick={handleSave}>
