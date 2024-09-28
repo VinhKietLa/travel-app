@@ -4,12 +4,14 @@
   padding: 20px;
   max-width: 600px;
   margin: 0 auto;
-  background-color: #f4f4f4;
+  background-color: #424242;
+  color: #ffffff;
 }
 
 h2 {
   text-align: center;
   margin-bottom: 20px;
+  color: #ffffff;
 }
 
 .form-group {
@@ -66,10 +68,12 @@ label {
   border-radius: 5px;
   border: 1px solid #ccc;
   resize: none;
+  background-color: #333333;
+  color: #ffffff;
 }
 
 button:hover {
-  opacity: 0.9;
+  opacity: 0.8;
 }
 .city-card {
   display: flex;
@@ -84,14 +88,7 @@ button:hover {
 }
 
 .city-card:hover {
-  background-color: #f9f9f9;
-}
-
-.city-image-placeholder img {
-  width: 50px;
-  height: 50px;
-  border-radius: 4px;
-  margin-right: 10px;
+  background-color: #5dade2;
 }
 
 .city-details {
@@ -99,7 +96,6 @@ button:hover {
 }
 
 .clickable-city {
-  color: #007bff;
-  text-decoration: underline;
+  color: #ffffff;
   cursor: pointer;
 }

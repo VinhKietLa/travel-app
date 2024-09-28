@@ -1,4 +1,11 @@
 .App {
   text-align: center;
   font-family: monospace;
+  color: #ffffff;
+  background-color: #1c1c1e;
+}
+
+.title {
+  background-color: #1c1c1e;
+  color: #ffffff;
 }

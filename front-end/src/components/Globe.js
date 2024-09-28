@@ -37,7 +37,7 @@ const GlobeComponent = () => {
       .bumpImageUrl(
         "https://unpkg.com/three-globe/example/img/earth-topology.png"
       )
-      .backgroundColor("#000");
+      .backgroundColor("#1C1C1E");
 
     // Fetch GeoJSON for country boundaries
     fetch(
@@ -222,7 +222,7 @@ const GlobeComponent = () => {
           position: "absolute",
           top: "10px",
           left: "10px",
-          backgroundColor: "#4A4A4A",
+          backgroundColor: "#333",
           padding: "10px",
           borderRadius: "5px",
           color: "#fff",
