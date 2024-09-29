@@ -3,13 +3,14 @@ import Globe from "globe.gl";
 import CountryModal from "./CountryModal";
 import DraggableLegend from "./DraggableLegend";
 
-const GlobeComponent = () => {
+const GlobeComponent = ({ isAuthenticated, setIsAuthenticated }) => {
   const globeRef = useRef(null);
   const [selectedCountry, setSelectedCountry] = useState(null);
   const [hoveredCountry, setHoveredCountry] = useState(null);
   const [countriesData, setCountriesData] = useState([]); // Store countries from backend
   const [cityMarkers, setCityMarkers] = useState([]); // Store city markers
   const globeInstance = useRef(null); // Ref to store the globe instance
+  const [showLogin, setShowLogin] = useState(false); // Show login form only when needed
 
   useEffect(() => {
     // Fetch countries and cities from the backend
@@ -88,8 +89,10 @@ const GlobeComponent = () => {
         .pointRadius(0.2); // Increase radius for larger markers
     }
   }, [countriesData, cityMarkers]); // This effect will only update when countriesData or cityMarkers change
-  // Handle country click
+
+  // Handle country click (only show modal if authenticated)
   const handleCountryClick = (countryName) => {
+    console.log("fired");
     // First, try to find the country by name
     fetch(
       `http://localhost:3000/countries/find_by_name/${encodeURIComponent(
@@ -105,7 +108,6 @@ const GlobeComponent = () => {
       })
       .then((countryData) => {
         if (countryData) {
-          // Make sure both `id` and `name` are passed to the modal
           setSelectedCountry({
             ...countryData,
           });
@@ -117,17 +119,17 @@ const GlobeComponent = () => {
   };
 
   const handleCityAdded = (newCity, updatedCountry) => {
-    // Use the passed `updatedCountry` data
+    if (!isAuthenticated) {
+      setShowLogin(true); // Show login form if user isn't logged in
+      return;
+    }
     if (updatedCountry && updatedCountry.id) {
       setCountriesData((prevCountries) =>
         prevCountries.map((country) =>
-          country.id === updatedCountry.id
-            ? updatedCountry // Replace the country with the updated one
-            : country
+          country.id === updatedCountry.id ? updatedCountry : country
         )
       );
 
-      // Add the new city marker to the globe
       setCityMarkers((prevMarkers) => [
         ...prevMarkers,
         {
@@ -142,16 +144,16 @@ const GlobeComponent = () => {
   };
 
   const handleCityDeleted = (countryId) => {
-    // Fetch the updated country data from the backend after deleting a city
+    if (!isAuthenticated) {
+      setShowLogin(true); // Show login form if user isn't logged in
+      return;
+    }
     fetch(`http://localhost:3000/countries/${countryId}`)
       .then((response) => response.json())
       .then((updatedCountry) => {
-        // Update the state with the updated country data
         setCountriesData((prevCountries) =>
           prevCountries.map((country) =>
-            country.id === updatedCountry.id
-              ? updatedCountry // Replace the country data with the updated one
-              : country
+            country.id === updatedCountry.id ? updatedCountry : country
           )
         );
       })
@@ -161,6 +163,10 @@ const GlobeComponent = () => {
   };
 
   const handleNextLocationToggled = (countryId, newStatus) => {
+    // if (!isAuthenticated) {
+    //   alert("You must be logged in to add a city.");
+    //   return;
+    // }
     fetch(`http://localhost:3000/countries/${countryId}`, {
       method: "PATCH",
       headers: {
@@ -172,17 +178,36 @@ const GlobeComponent = () => {
     })
       .then((response) => response.json())
       .then((updatedCountry) => {
-        // Update countriesData with the updated country status
         setCountriesData((prevCountries) =>
           prevCountries.map((country) =>
             country.id === updatedCountry.id ? updatedCountry : country
           )
         );
       })
-      .catch((error) => {
-        console.error("Error updating country status:", error);
-      });
+      .catch((error) => console.error("Error updating country status:", error));
   };
+
+  // Handle login form submission
+  const handleLogin = (username, password) => {
+    fetch("http://localhost:3000/login", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ username, password }),
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        if (data.message) {
+          setIsAuthenticated(true); // Log in and allow editing
+          setShowLogin(false); // Hide login form
+        } else {
+          alert("Invalid credentials");
+        }
+      })
+      .catch((error) => console.error("Error during login:", error));
+  };
+
   const [stats, setStats] = useState({
     total_countries_visited: 0,
     total_cities_visited: 0,
@@ -218,6 +243,7 @@ const GlobeComponent = () => {
           Hovering Over: {hoveredCountry}
         </div>
       )}
+
       <div
         style={{
           position: "absolute",
@@ -242,10 +268,28 @@ const GlobeComponent = () => {
           onCityAdded={handleCityAdded} // Pass handleCityAdded to CountryModal
           onCityDeleted={handleCityDeleted} // Pass handleCityDeleted to CountryModal
           onNextLocation={handleNextLocationToggled} // Pass handleNextLocation to CountryModal
+          isAuthenticated={isAuthenticated} // Pass authentication status
         />
       )}
 
-      {/* Draggable Legend */}
+      {showLogin && (
+        <div>
+          <h2>Login to edit data</h2>
+          <input type="text" placeholder="Username" id="username" />
+          <input type="password" placeholder="Password" id="password" />
+          <button
+            onClick={() =>
+              handleLogin(
+                document.getElementById("username").value,
+                document.getElementById("password").value
+              )
+            }
+          >
+            Login
+          </button>
+        </div>
+      )}
+
       <DraggableLegend>
         <div
           style={{
@@ -257,7 +301,7 @@ const GlobeComponent = () => {
         >
           <h4>Country</h4>
           <p>
-            <span style={{ color: "rgba(46, 204, 113, 1" }}>●</span> Visited
+            <span style={{ color: "rgba(46, 204, 113, 1)" }}>●</span> Visited
           </p>
           <p>
             <span style={{ color: "rgba(241, 196, 15, 1)" }}>●</span> Wish to

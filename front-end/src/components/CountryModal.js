@@ -7,10 +7,11 @@ const CountryModal = ({
   isOpen,
   countryData,
   onClose,
-  onCountryStatusUpdate,
+  // onCountryStatusUpdate,
   onCityDeleted,
   onCityAdded,
   onNextLocation,
+  isAuthenticated,
 }) => {
   const [cities, setCities] = useState([]); // Ensure cities is initialized as an array
   const [newCityName, setNewCityName] = useState(""); // For adding new city
@@ -28,7 +29,11 @@ const CountryModal = ({
 
   // Handle adding a new city and saving it to the backend
   const handleAddCity = () => {
-    if (newCityName.trim() !== "" && localCountryData?.id) {
+    if (!isAuthenticated) {
+      alert("You must be logged in to add a city.");
+      return;
+    }
+    if (isAuthenticated && newCityName.trim() !== "" && localCountryData?.id) {
       fetch(`http://localhost:3000/countries/${localCountryData.id}/cities`, {
         method: "POST",
         headers: {
