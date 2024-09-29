@@ -1,4 +1,6 @@
 class CitiesController < ApplicationController
+  before_action :require_login, only: [:create, :destroy]
+
   def index
     @country = Country.find(params[:country_id])
     @cities = @country.cities
@@ -47,6 +49,12 @@ class CitiesController < ApplicationController
       country.update(visited: true) # Set visited to true (green)
     else
       country.update(visited: false) # Set visited to false (red)
+    end
+  end  
+
+  def require_login
+    unless logged_in?
+      render json: { error: 'You must be logged in to perform this action' }, status: :unauthorized
     end
   end  
   private

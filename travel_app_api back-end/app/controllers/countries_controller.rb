@@ -1,4 +1,5 @@
 class CountriesController < ApplicationController
+  before_action :require_login, only: [:create, :update] # Protect these actions
 
   # GET /countries - retrieve all countries
   def index
