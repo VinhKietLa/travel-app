@@ -8,6 +8,9 @@ Bundler.require(*Rails.groups)
 
 module TravelAppApi
   class Application < Rails::Application
+    config.api_only = true
+    config.middleware.delete ActionDispatch::Flash
+
     config.middleware.use ActionDispatch::Cookies
     config.middleware.use ActionDispatch::Session::CookieStore, key: '_travel_app_session'
     # Initialize configuration defaults for originally generated Rails version.

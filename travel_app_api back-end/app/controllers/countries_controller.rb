@@ -1,4 +1,7 @@
 class CountriesController < ApplicationController
+  include Authentication
+  skip_before_action :authorize_request, only: [:index] # Allow public access to index action
+
   before_action :require_login, only: [:create, :update] # Protect these actions
 
   # GET /countries - retrieve all countries

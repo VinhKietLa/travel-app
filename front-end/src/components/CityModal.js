@@ -55,6 +55,7 @@ const CityModal = ({ isOpen, cityData, onClose, onSave, onDelete }) => {
         {
           method: "PATCH",
           body: formData,
+          credentials: "include", // Ensure cookies are sent with the request
         }
       );
       const updatedCity = await response.json();
@@ -88,7 +89,8 @@ const CityModal = ({ isOpen, cityData, onClose, onSave, onDelete }) => {
     axios
       .put(
         `http://localhost:3000/countries/${cityData.country_id}/cities/${cityData.id}`,
-        updatedCityData
+        updatedCityData,
+        { withCredentials: true }
       )
       .then((response) => {
         onSave(response.data);

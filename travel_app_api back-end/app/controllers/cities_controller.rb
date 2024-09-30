@@ -1,4 +1,9 @@
 class CitiesController < ApplicationController
+
+  include Authentication
+
+  protect_from_forgery unless: -> { request.format.json? } # Skip CSRF for JSON requests
+
   before_action :require_login, only: [:create, :destroy]
 
   def index
@@ -53,6 +58,8 @@ class CitiesController < ApplicationController
   end  
 
   def require_login
+    Rails.logger.debug "Session user_id: #{session[:user_id]}"
+    Rails.logger.debug "Current user: #{current_user.inspect}"
     unless logged_in?
       render json: { error: 'You must be logged in to perform this action' }, status: :unauthorized
     end
