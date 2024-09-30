@@ -9,7 +9,7 @@ const DraggableLegend = ({ children }) => {
 
   // Fetch the saved position from the backend when the component mounts
   useEffect(() => {
-    fetch("http://localhost:3000/legend_position", {
+    fetch(`${process.env.REACT_APP_API_URL}/legend_position`, {
       credentials: "include", // Include session cookies
     })
       .then((res) => res.json())
@@ -51,7 +51,7 @@ const DraggableLegend = ({ children }) => {
   // Save position to backend only after dragging stops and only if the position has changed
   useEffect(() => {
     if (!isDragging && hasMoved) {
-      fetch("http://localhost:3000/legend_position", {
+      fetch(`${process.env.REACT_APP_API_URL}/legend_position`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
