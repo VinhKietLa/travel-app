@@ -1,4 +1,5 @@
 import { useState } from "react";
+import "./LoginComponent.css";
 
 export const LoginComponent = ({ setIsAuthenticated }) => {
   const [username, setUsername] = useState("");
@@ -23,25 +24,26 @@ export const LoginComponent = ({ setIsAuthenticated }) => {
           alert("Login failed");
         }
       })
-
       .catch((error) => console.error("Error logging in:", error));
   };
 
   return (
-    <form onSubmit={handleLogin}>
-      <input
-        type="text"
-        placeholder="Username"
-        value={username}
-        onChange={(e) => setUsername(e.target.value)}
-      />
-      <input
-        type="password"
-        placeholder="Password"
-        value={password}
-        onChange={(e) => setPassword(e.target.value)}
-      />
-      <button type="submit">Login</button>
-    </form>
+    <div className="login-container">
+      <form className="login-form" onSubmit={handleLogin}>
+        <input
+          type="text"
+          placeholder="Username"
+          value={username}
+          onChange={(e) => setUsername(e.target.value)}
+        />
+        <input
+          type="password"
+          placeholder="Password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+        />
+        <button type="submit">Login</button>
+      </form>
+    </div>
   );
 };
