@@ -1,21 +1,40 @@
-class ApplicationController < ActionController::Base
-    helper_method :current_user, :logged_in?
+class ApplicationController < ActionController::API
+  before_action :authorize_request
+
+  def current_user
+    @current_user
+  end
+
+  private
+
+  def authorize_request
+    header = request.headers['Authorization']
+    Rails.logger.debug "Authorization Header: #{header.inspect}" # Log the entire header for debugging
   
-    # Skip CSRF protection for JSON requests (commonly used in APIs)
-    protect_from_forgery unless: -> { request.format.json? }
-  
-    def current_user
-      @current_user ||= User.find(session[:user_id]) if session[:user_id]
+    if header.nil?
+      Rails.logger.debug "Token missing"
+      return render json: { errors: 'Token missing' }, status: :unauthorized
     end
   
-    def logged_in?
-      !!current_user
-    end
+    token = header.split(' ').last
+    Rails.logger.debug "Extracted token: #{token}"
   
-    def require_login
-      unless logged_in?
-        render json: { error: 'You must be logged in to perform this action' }, status: :unauthorized
+    begin
+      decoded = JwtService.decode(token)
+      if decoded.nil?
+        Rails.logger.debug "Decoded token is nil"
+        return render json: { errors: 'Invalid token' }, status: :unauthorized
       end
+  
+      Rails.logger.debug "Decoded token: #{decoded.inspect}" # Log the decoded token
+      @current_user = User.find(decoded[:user_id])
+    rescue ActiveRecord::RecordNotFound => e
+      Rails.logger.debug "User not found: #{e.message}"
+      render json: { errors: 'User not found' }, status: :unauthorized
+    rescue JWT::DecodeError => e
+      Rails.logger.debug "JWT Decode Error: #{e.message}"
+      render json: { errors: 'Invalid token' }, status: :unauthorized
     end
   end
   
+end

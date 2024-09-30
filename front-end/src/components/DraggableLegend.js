@@ -9,7 +9,9 @@ const DraggableLegend = ({ children }) => {
 
   // Fetch the saved position from the backend when the component mounts
   useEffect(() => {
-    fetch("http://localhost:3000/legend_position")
+    fetch("http://localhost:3000/legend_position", {
+      credentials: "include", // Include session cookies
+    })
       .then((res) => res.json())
       .then((data) => {
         setPosition({ x: data.x, y: data.y });
@@ -54,6 +56,7 @@ const DraggableLegend = ({ children }) => {
         headers: {
           "Content-Type": "application/json",
         },
+        credentials: "include", // Include session cookies
         body: JSON.stringify({
           legend_position: {
             x: position.x,

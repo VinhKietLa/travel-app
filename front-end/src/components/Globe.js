@@ -3,7 +3,7 @@ import Globe from "globe.gl";
 import CountryModal from "./CountryModal";
 import DraggableLegend from "./DraggableLegend";
 
-const GlobeComponent = ({ isAuthenticated, setIsAuthenticated }) => {
+const GlobeComponent = ({ isAuthenticated, setIsAuthenticated, csrfToken }) => {
   const globeRef = useRef(null);
   const [selectedCountry, setSelectedCountry] = useState(null);
   const [hoveredCountry, setHoveredCountry] = useState(null);
@@ -14,11 +14,15 @@ const GlobeComponent = ({ isAuthenticated, setIsAuthenticated }) => {
 
   useEffect(() => {
     // Fetch countries and cities from the backend
-    fetch("http://localhost:3000/countries")
+    fetch("http://localhost:3000/countries", {
+      credentials: "include", // Include session cookies
+      headers: {
+        "X-CSRF-Token": csrfToken, // Include the CSRF token here
+      },
+    })
       .then((res) => res.json())
       .then((data) => {
         setCountriesData(data); // Save country data to state
-        // Extract city markers (latitude and longitude)
         const cities = data.flatMap((country) =>
           country.cities.map((city) => ({
             lat: parseFloat(city.latitude),
@@ -92,13 +96,21 @@ const GlobeComponent = ({ isAuthenticated, setIsAuthenticated }) => {
 
   // Handle country click (only show modal if authenticated)
   const handleCountryClick = (countryName) => {
-    console.log("fired");
+    const token = localStorage.getItem("token");
+    if (!token || token === "true") {
+      // Check for problematic values
+      console.error("No valid token found!");
+      return;
+    }
+
     // First, try to find the country by name
-    fetch(
-      `http://localhost:3000/countries/find_by_name/${encodeURIComponent(
-        countryName
-      )}`
-    )
+    fetch(`http://localhost:3000/countries/find_by_name/${countryName}`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`, // Include the JWT token in Authorization header
+      },
+    })
       .then((response) => {
         if (response.ok) {
           return response.json(); // If found, return the country data
@@ -148,7 +160,12 @@ const GlobeComponent = ({ isAuthenticated, setIsAuthenticated }) => {
       setShowLogin(true); // Show login form if user isn't logged in
       return;
     }
-    fetch(`http://localhost:3000/countries/${countryId}`)
+    fetch(`http://localhost:3000/countries/${countryId}`, {
+      credentials: "include", // Include session cookies
+      headers: {
+        "X-CSRF-Token": csrfToken, // Include the CSRF token here
+      },
+    })
       .then((response) => response.json())
       .then((updatedCountry) => {
         setCountriesData((prevCountries) =>
@@ -171,7 +188,9 @@ const GlobeComponent = ({ isAuthenticated, setIsAuthenticated }) => {
       method: "PATCH",
       headers: {
         "Content-Type": "application/json",
+        "X-CSRF-Token": csrfToken, // Include the CSRF token here
       },
+      credentials: "include", // Include session cookies
       body: JSON.stringify({
         country: { future_travel: newStatus },
       }),
@@ -193,7 +212,9 @@ const GlobeComponent = ({ isAuthenticated, setIsAuthenticated }) => {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
+        "X-CSRF-Token": csrfToken, // Include the CSRF token here
       },
+      credentials: "include", // Ensure cookies are sent with the request
       body: JSON.stringify({ username, password }),
     })
       .then((response) => response.json())
@@ -214,7 +235,9 @@ const GlobeComponent = ({ isAuthenticated, setIsAuthenticated }) => {
   });
 
   useEffect(() => {
-    fetch("http://localhost:3000/travel_stats")
+    fetch("http://localhost:3000/travel_stats", {
+      credentials: "include", // Include session cookies
+    })
       .then((response) => response.json())
       .then((data) => {
         setStats(data);
@@ -269,6 +292,7 @@ const GlobeComponent = ({ isAuthenticated, setIsAuthenticated }) => {
           onCityDeleted={handleCityDeleted} // Pass handleCityDeleted to CountryModal
           onNextLocation={handleNextLocationToggled} // Pass handleNextLocation to CountryModal
           isAuthenticated={isAuthenticated} // Pass authentication status
+          csrfToken={csrfToken} // Pass CSRF token to CountryModal
         />
       )}
 

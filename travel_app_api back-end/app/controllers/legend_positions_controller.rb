@@ -1,4 +1,6 @@
 class LegendPositionsController < ApplicationController
+  skip_before_action :authorize_request, only: [:show, :update] # Allow public access to index action
+
     def show
       # Assuming you only have one position saved for the legend
       legend_position = LegendPosition.first_or_create(x: 0, y: 0)

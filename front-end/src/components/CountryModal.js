@@ -12,6 +12,7 @@ const CountryModal = ({
   onCityAdded,
   onNextLocation,
   isAuthenticated,
+  csrfToken,
 }) => {
   const [cities, setCities] = useState([]); // Ensure cities is initialized as an array
   const [newCityName, setNewCityName] = useState(""); // For adding new city
@@ -38,7 +39,9 @@ const CountryModal = ({
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          "X-CSRF-Token": csrfToken, // Include the CSRF token here
         },
+        credentials: "include", // Ensure cookies are sent with the request
         body: JSON.stringify({
           city: { name: newCityName },
         }),
@@ -49,7 +52,9 @@ const CountryModal = ({
           setNewCityName(""); // Clear the input field
 
           // Fetch the updated country data after adding the new city
-          fetch(`http://localhost:3000/countries/${localCountryData.id}`)
+          fetch(`http://localhost:3000/countries/${localCountryData.id}`, {
+            credentials: "include", // Include session cookies
+          })
             .then((response) => response.json())
             .then((updatedCountry) => {
               // Notify parent of the updated country data, including the new city
@@ -71,7 +76,11 @@ const CountryModal = ({
       `http://localhost:3000/countries/${countryData.id}/cities/${cityId}`,
       {
         method: "DELETE",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          "X-CSRF-Token": csrfToken, // Include the CSRF token here
+        },
+        credentials: "include", // Ensure cookies are sent with the request
       }
     )
       .then(() => {
