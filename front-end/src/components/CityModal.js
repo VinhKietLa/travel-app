@@ -19,7 +19,7 @@ const CityModal = ({ isOpen, cityData, onClose, onSave, onDelete }) => {
   useEffect(() => {
     if (isOpen && cityData) {
       fetch(
-        `http://localhost:3000/countries/${cityData.country_id}/cities/${cityData.id}`,
+        `${process.env.REACT_APP_API_URL}/countries/${cityData.country_id}/cities/${cityData.id}`,
         {
           method: "GET",
           credentials: "include", // Include session cookies
@@ -65,7 +65,7 @@ const CityModal = ({ isOpen, cityData, onClose, onSave, onDelete }) => {
 
     try {
       const response = await fetch(
-        `http://localhost:3000/countries/${cityData.country_id}/cities/${cityData.id}`,
+        `${process.env.REACT_APP_API_URL}/countries/${cityData.country_id}/cities/${cityData.id}`,
         {
           method: "PATCH",
           headers: {
@@ -108,7 +108,7 @@ const CityModal = ({ isOpen, cityData, onClose, onSave, onDelete }) => {
     const token = localStorage.getItem("token");
 
     fetch(
-      `http://localhost:3000/countries/${cityData.country_id}/cities/${cityData.id}`,
+      `${process.env.REACT_APP_API_URL}/countries/${cityData.country_id}/cities/${cityData.id}`,
       {
         method: "PUT",
         headers: {

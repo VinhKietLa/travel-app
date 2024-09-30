@@ -37,26 +37,32 @@ const CountryModal = ({
       return;
     }
     if (isAuthenticated && newCityName.trim() !== "" && localCountryData?.id) {
-      fetch(`http://localhost:3000/countries/${localCountryData.id}/cities`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`, // Include the JWT token in Authorization header
-        },
-        credentials: "include", // Ensure cookies are sent with the request
-        body: JSON.stringify({
-          city: { name: newCityName },
-        }),
-      })
+      fetch(
+        `${process.env.REACT_APP_API_URL}/countries/${localCountryData.id}/cities`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`, // Include the JWT token in Authorization header
+          },
+          credentials: "include", // Ensure cookies are sent with the request
+          body: JSON.stringify({
+            city: { name: newCityName },
+          }),
+        }
+      )
         .then((response) => response.json())
         .then((newCity) => {
           setCities([...cities, newCity]);
           setNewCityName(""); // Clear the input field
 
           // Fetch the updated country data after adding the new city
-          fetch(`http://localhost:3000/countries/${localCountryData.id}`, {
-            credentials: "include", // Include session cookies
-          })
+          fetch(
+            `${process.env.REACT_APP_API_URL}/countries/${localCountryData.id}`,
+            {
+              credentials: "include", // Include session cookies
+            }
+          )
             .then((response) => response.json())
             .then((updatedCountry) => {
               // Notify parent of the updated country data, including the new city
@@ -76,7 +82,7 @@ const CountryModal = ({
   const handleDeleteCity = (cityId) => {
     const token = localStorage.getItem("token");
     fetch(
-      `http://localhost:3000/countries/${countryData.id}/cities/${cityId}`,
+      `${process.env.REACT_APP_API_URL}/countries/${countryData.id}/cities/${cityId}`,
       {
         method: "DELETE",
         headers: {

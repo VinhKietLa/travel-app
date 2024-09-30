@@ -14,7 +14,7 @@ const GlobeComponent = ({ isAuthenticated, setIsAuthenticated, csrfToken }) => {
 
   useEffect(() => {
     // Fetch countries and cities from the backend
-    fetch("http://localhost:3000/countries", {
+    fetch(`${process.env.REACT_APP_API_URL}/countries`, {
       credentials: "include", // Include session cookies
     })
       .then((res) => res.json())
@@ -94,12 +94,15 @@ const GlobeComponent = ({ isAuthenticated, setIsAuthenticated, csrfToken }) => {
   // Handle country click (only show modal if authenticated)
   const handleCountryClick = (countryName) => {
     // First, try to find the country by name
-    fetch(`http://localhost:3000/countries/find_by_name/${countryName}`, {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-      },
-    })
+    fetch(
+      `${process.env.REACT_APP_API_URL}/countries/find_by_name/${countryName}`,
+      {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }
+    )
       .then((response) => {
         if (response.ok) {
           return response.json(); // If found, return the country data
@@ -149,7 +152,7 @@ const GlobeComponent = ({ isAuthenticated, setIsAuthenticated, csrfToken }) => {
       setShowLogin(true); // Show login form if user isn't logged in
       return;
     }
-    fetch(`http://localhost:3000/countries/${countryId}`, {
+    fetch(`${process.env.REACT_APP_API_URL}/countries/${countryId}`, {
       credentials: "include", // Include session cookies
       headers: {
         "X-CSRF-Token": csrfToken, // Include the CSRF token here
@@ -170,15 +173,13 @@ const GlobeComponent = ({ isAuthenticated, setIsAuthenticated, csrfToken }) => {
 
   const handleNextLocationToggled = (countryId, newStatus) => {
     const token = localStorage.getItem("token");
-    console.log("Token: ", token); // Debugging token
-    console.log("Is Authenticated: ", isAuthenticated); // Debugging auth status
 
     if (!isAuthenticated) {
       alert("You must be logged in to add a city.");
       return;
     }
 
-    fetch(`http://localhost:3000/countries/${countryId}`, {
+    fetch(`${process.env.REACT_APP_API_URL}/countries/${countryId}`, {
       method: "PATCH",
       headers: {
         "Content-Type": "application/json",
@@ -207,7 +208,7 @@ const GlobeComponent = ({ isAuthenticated, setIsAuthenticated, csrfToken }) => {
 
   // Handle login form submission
   const handleLogin = (username, password) => {
-    fetch("http://localhost:3000/login", {
+    fetch(`${process.env.REACT_APP_API_URL}/login`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -234,7 +235,7 @@ const GlobeComponent = ({ isAuthenticated, setIsAuthenticated, csrfToken }) => {
   });
 
   useEffect(() => {
-    fetch("http://localhost:3000/travel_stats", {
+    fetch(`${process.env.REACT_APP_API_URL}/travel_stats`, {
       credentials: "include", // Include session cookies
     })
       .then((response) => response.json())
