@@ -19,18 +19,31 @@ const CityModal = ({ isOpen, cityData, onClose, onSave, onDelete }) => {
 
   useEffect(() => {
     if (isOpen && cityData) {
-      axios
-        .get(
-          `http://localhost:3000/countries/${cityData.country_id}/cities/${cityData.id}`
-        )
+      fetch(
+        `http://localhost:3000/countries/${cityData.country_id}/cities/${cityData.id}`,
+        {
+          method: "GET",
+          credentials: "include", // Include session cookies
+        }
+      )
         .then((response) => {
-          const updatedCity = response.data;
+          if (!response.ok) {
+            throw new Error("Failed to fetch city data");
+          }
+          return response.json(); // Parse the response body as JSON
+        })
+        .then((updatedCity) => {
+          // Set the state with the updated city data
           setName(updatedCity.name || "");
           setRecommendations(updatedCity.recommendations || "");
           setHighlights(updatedCity.highlights || "");
           setDislikes(updatedCity.dislikes || "");
           setNotes(updatedCity.notes || "");
-          setUploadedImages(updatedCity.images_urls || []);
+          setUploadedImages(
+            Array.isArray(updatedCity.images_urls)
+              ? updatedCity.images_urls
+              : []
+          );
         })
         .catch((error) => {
           console.error("Error fetching city data:", error);
@@ -49,21 +62,29 @@ const CityModal = ({ isOpen, cityData, onClose, onSave, onDelete }) => {
       formData.append("city[images][]", selectedFiles[i]);
     }
 
+    const token = localStorage.getItem("token"); // Retrieve the token from localStorage
+
     try {
       const response = await fetch(
         `http://localhost:3000/countries/${cityData.country_id}/cities/${cityData.id}`,
         {
           method: "PATCH",
+          headers: {
+            Authorization: `Bearer ${token}`, // Include the JWT token in Authorization header
+          },
           body: formData,
           credentials: "include", // Ensure cookies are sent with the request
         }
       );
       const updatedCity = await response.json();
-
-      setUploadedImages((prevImages) => [
-        ...prevImages,
-        ...updatedCity.images_urls,
-      ]);
+      console.log(updatedCity.images_urls);
+      // Ensure only unique images are added by using a Set
+      setUploadedImages((prevImages) => {
+        const uniqueImages = [
+          ...new Set([...prevImages, ...updatedCity.images_urls]),
+        ];
+        return uniqueImages;
+      });
 
       setSelectedFiles([]);
       if (fileInputRef.current) {
@@ -85,23 +106,28 @@ const CityModal = ({ isOpen, cityData, onClose, onSave, onDelete }) => {
       dislikes,
       notes,
     };
+    const token = localStorage.getItem("token");
 
-    axios
-      .put(
-        `http://localhost:3000/countries/${cityData.country_id}/cities/${cityData.id}`,
-        updatedCityData,
-        { withCredentials: true }
-      )
-      .then((response) => {
-        onSave(response.data);
+    fetch(
+      `http://localhost:3000/countries/${cityData.country_id}/cities/${cityData.id}`,
+      {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`, // Include the JWT token in Authorization header
+        },
+        body: JSON.stringify(updatedCityData),
+        credentials: "include", // Include session cookies
+      }
+    )
+      .then((response) => response.json())
+      .then((data) => {
+        onSave(data);
         onClose();
       })
       .catch((error) => {
         console.error("Error updating city information:", error);
       });
-
-    onSave(updatedCityData);
-    onClose();
   };
 
   const handleDelete = () => {
@@ -111,7 +137,7 @@ const CityModal = ({ isOpen, cityData, onClose, onSave, onDelete }) => {
 
   const settings = {
     dots: true,
-    infinite: true,
+    infinite: uploadedImages.length > 1, // Enable infinite scroll only if there are more than 1 image
     speed: 500,
     slidesToShow: 1,
     slidesToScroll: 1,

@@ -30,6 +30,8 @@ const CountryModal = ({
 
   // Handle adding a new city and saving it to the backend
   const handleAddCity = () => {
+    const token = localStorage.getItem("token");
+
     if (!isAuthenticated) {
       alert("You must be logged in to add a city.");
       return;
@@ -39,7 +41,7 @@ const CountryModal = ({
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "X-CSRF-Token": csrfToken, // Include the CSRF token here
+          Authorization: `Bearer ${token}`, // Include the JWT token in Authorization header
         },
         credentials: "include", // Ensure cookies are sent with the request
         body: JSON.stringify({
@@ -72,13 +74,14 @@ const CountryModal = ({
 
   // Handle removing a city
   const handleDeleteCity = (cityId) => {
+    const token = localStorage.getItem("token");
     fetch(
       `http://localhost:3000/countries/${countryData.id}/cities/${cityId}`,
       {
         method: "DELETE",
         headers: {
           "Content-Type": "application/json",
-          "X-CSRF-Token": csrfToken, // Include the CSRF token here
+          Authorization: `Bearer ${token}`, // Include the JWT token in Authorization header
         },
         credentials: "include", // Ensure cookies are sent with the request
       }

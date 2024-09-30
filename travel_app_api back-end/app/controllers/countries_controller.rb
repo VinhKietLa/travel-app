@@ -1,8 +1,8 @@
 class CountriesController < ApplicationController
   include Authentication
-  skip_before_action :authorize_request, only: [:index] # Allow public access to index action
+  skip_before_action :authorize_request, only: [:index, :find_by_name, :show] # Allow public access to index action
 
-  before_action :require_login, only: [:create, :update] # Protect these actions
+  before_action :authorize_request, only: [:create, :update, :visited_toggle] # Protect these actions
 
   # GET /countries - retrieve all countries
   def index
@@ -50,7 +50,6 @@ class CountriesController < ApplicationController
 
     def visited_toggle(country)
     @country = Country.find(params[:id])
-
     end
 
   private

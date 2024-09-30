@@ -16,9 +16,6 @@ const GlobeComponent = ({ isAuthenticated, setIsAuthenticated, csrfToken }) => {
     // Fetch countries and cities from the backend
     fetch("http://localhost:3000/countries", {
       credentials: "include", // Include session cookies
-      headers: {
-        "X-CSRF-Token": csrfToken, // Include the CSRF token here
-      },
     })
       .then((res) => res.json())
       .then((data) => {
@@ -96,19 +93,11 @@ const GlobeComponent = ({ isAuthenticated, setIsAuthenticated, csrfToken }) => {
 
   // Handle country click (only show modal if authenticated)
   const handleCountryClick = (countryName) => {
-    const token = localStorage.getItem("token");
-    if (!token || token === "true") {
-      // Check for problematic values
-      console.error("No valid token found!");
-      return;
-    }
-
     // First, try to find the country by name
     fetch(`http://localhost:3000/countries/find_by_name/${countryName}`, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`, // Include the JWT token in Authorization header
       },
     })
       .then((response) => {
@@ -180,22 +169,32 @@ const GlobeComponent = ({ isAuthenticated, setIsAuthenticated, csrfToken }) => {
   };
 
   const handleNextLocationToggled = (countryId, newStatus) => {
-    // if (!isAuthenticated) {
-    //   alert("You must be logged in to add a city.");
-    //   return;
-    // }
+    const token = localStorage.getItem("token");
+    console.log("Token: ", token); // Debugging token
+    console.log("Is Authenticated: ", isAuthenticated); // Debugging auth status
+
+    if (!isAuthenticated) {
+      alert("You must be logged in to add a city.");
+      return;
+    }
+
     fetch(`http://localhost:3000/countries/${countryId}`, {
       method: "PATCH",
       headers: {
         "Content-Type": "application/json",
-        "X-CSRF-Token": csrfToken, // Include the CSRF token here
+        Authorization: `Bearer ${token}`,
       },
-      credentials: "include", // Include session cookies
+      credentials: "include",
       body: JSON.stringify({
         country: { future_travel: newStatus },
       }),
     })
-      .then((response) => response.json())
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error("Error updating country status");
+        }
+        return response.json();
+      })
       .then((updatedCountry) => {
         setCountriesData((prevCountries) =>
           prevCountries.map((country) =>
