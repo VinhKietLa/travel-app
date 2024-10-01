@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 import Globe from "globe.gl";
 import CountryModal from "./CountryModal";
 import DraggableLegend from "./DraggableLegend";
+import "./Globe.css";
 
 const GlobeComponent = ({ isAuthenticated, setIsAuthenticated, csrfToken }) => {
   const globeRef = useRef(null);
@@ -56,7 +57,6 @@ const GlobeComponent = ({ isAuthenticated, setIsAuthenticated, csrfToken }) => {
           })
           .onPolygonClick((country) => {
             const countryName = country.properties.name;
-            console.log(`Clicked on: ${countryName}`);
             handleCountryClick(countryName);
           });
       })
@@ -123,6 +123,10 @@ const GlobeComponent = ({ isAuthenticated, setIsAuthenticated, csrfToken }) => {
   };
 
   const handleCityAdded = (newCity, updatedCountry) => {
+    if (!isAuthenticated) {
+      setShowLogin(true); // Show login form if user isn't logged in
+      return;
+    }
     if (updatedCountry && updatedCountry.id) {
       setCountriesData((prevCountries) =>
         prevCountries.map((country) =>
@@ -144,6 +148,10 @@ const GlobeComponent = ({ isAuthenticated, setIsAuthenticated, csrfToken }) => {
   };
 
   const handleCityDeleted = (countryId) => {
+    if (!isAuthenticated) {
+      setShowLogin(true); // Show login form if user isn't logged in
+      return;
+    }
     fetch(`${process.env.REACT_APP_API_URL}/countries/${countryId}`, {
       credentials: "include", // Include session cookies
       headers: {
@@ -167,7 +175,7 @@ const GlobeComponent = ({ isAuthenticated, setIsAuthenticated, csrfToken }) => {
     const token = localStorage.getItem("token");
 
     if (!isAuthenticated) {
-      alert("You must be logged in to toggle a city.");
+      alert("You must be logged in to add a city.");
       return;
     }
 
@@ -238,9 +246,10 @@ const GlobeComponent = ({ isAuthenticated, setIsAuthenticated, csrfToken }) => {
   }, [countriesData]);
 
   return (
-    <div style={{ position: "relative" }}>
-      <div ref={globeRef} style={{ height: "600px", width: "100%" }}></div>
+    <div className="globeContainer">
+      <div id="globe" ref={globeRef}></div>
 
+      {/* //Hover country text// */}
       {hoveredCountry && (
         <div
           style={{
@@ -258,23 +267,31 @@ const GlobeComponent = ({ isAuthenticated, setIsAuthenticated, csrfToken }) => {
           Hovering Over: {hoveredCountry}
         </div>
       )}
-
-      <div
-        style={{
-          position: "absolute",
-          top: "10px",
-          left: "10px",
-          backgroundColor: "#333",
-          padding: "10px",
-          borderRadius: "5px",
-          color: "#fff",
-        }}
-      >
+      {/* //Travel stats// */}
+      <div className="travelStats">
         <h4>Travel Stats</h4>
         <p>Total Countries Visited: {stats.total_countries_visited}</p>
         <p>Total Cities Visited: {stats.total_cities_visited}</p>
       </div>
-
+      {/* //Country status// */}
+      <div className="countryStatus">
+        <h4>Country</h4>
+        <p>
+          <span style={{ color: "rgba(46, 204, 113, 1)" }}>●</span> Visited
+        </p>
+        <p>
+          <span style={{ color: "rgba(241, 196, 15, 1)" }}>●</span> Wish to
+          visit next
+        </p>
+        <p>
+          <span style={{ color: "rgba(231, 76, 60, 1)" }}>●</span> Haven't
+          visited
+        </p>
+        <p>
+          <span style={{ color: "#2980B9" }}>●</span> Cities visited
+        </p>
+      </div>
+      {/* //Country modal// */}
       {selectedCountry && (
         <CountryModal
           isOpen={!!selectedCountry}
@@ -287,7 +304,6 @@ const GlobeComponent = ({ isAuthenticated, setIsAuthenticated, csrfToken }) => {
           csrfToken={csrfToken} // Pass CSRF token to CountryModal
         />
       )}
-
       {showLogin && (
         <div>
           <h2>Login to edit data</h2>
@@ -305,33 +321,6 @@ const GlobeComponent = ({ isAuthenticated, setIsAuthenticated, csrfToken }) => {
           </button>
         </div>
       )}
-
-      <DraggableLegend>
-        <div
-          style={{
-            backgroundColor: "#333",
-            color: "#fff",
-            padding: "10px",
-            borderRadius: "5px",
-          }}
-        >
-          <h4>Country</h4>
-          <p>
-            <span style={{ color: "rgba(46, 204, 113, 1)" }}>●</span> Visited
-          </p>
-          <p>
-            <span style={{ color: "rgba(241, 196, 15, 1)" }}>●</span> Wish to
-            visit next
-          </p>
-          <p>
-            <span style={{ color: "rgba(231, 76, 60, 1)" }}>●</span> Haven't
-            visited
-          </p>
-          <p>
-            <span style={{ color: "#2980B9" }}>●</span> Cities visited
-          </p>
-        </div>
-      </DraggableLegend>
     </div>
   );
 };
