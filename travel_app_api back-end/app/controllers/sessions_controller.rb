@@ -7,11 +7,12 @@ class SessionsController < ApplicationController
     @user = User.find_by(username: params[:username])
 
     if @user && @user.authenticate(params[:password])
+      Rails.logger.debug "User authenticated successfully: #{@user.username}" # Added log
       token = JwtService.encode(user_id: @user.id)
-      Rails.logger.debug "Generated token: #{token}"  # Add this log to check if token is generated
+      Rails.logger.debug "Generated token: #{token}"  # Ensure this log is added
       render json: { token: token }, status: :ok
     else
-      Rails.logger.debug "Invalid login attempt"
+      Rails.logger.debug "Invalid username or password"
       render json: { error: 'Invalid username or password' }, status: :unauthorized
     end
   end
