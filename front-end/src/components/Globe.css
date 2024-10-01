@@ -34,3 +34,56 @@
     margin-bottom: 10px;
   }
 }
+
+@media (min-width: 481px) and (max-width: 767px) {
+  .globeContainer {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: center; /* Center items vertically */
+    align-items: center; /* Center items horizontally */
+    height: 100%; /* Set height to full viewport */
+  }
+
+  #globe {
+    height: 80%; /* Ensure it occupies part of the container */
+    width: 100%; /* Ensure it takes full width */
+  }
+}
+.globeContainer {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: center; /* Center items vertically */
+  align-items: center; /* Center items horizontally */
+  height: 100%; /* Set height to full viewport */
+}
+
+#globe {
+  height: 80%; /* Ensure it occupies part of the container */
+}
+
+.travelStats {
+  position: absolute;
+  background: #333;
+  top: 10px;
+  left: 10px;
+  padding: 10px;
+  border: 5px;
+  color: #fff;
+  width: 10%;
+  border-radius: 5px;
+  margin-bottom: 10px;
+}
+.countryStatus {
+  position: absolute;
+  background: #333;
+  top: 220px;
+  left: 10px;
+  padding: 10px;
+  border: 5px;
+  color: #fff;
+  width: 10%;
+  border-radius: 5px;
+  margin-bottom: 10px;
+}
