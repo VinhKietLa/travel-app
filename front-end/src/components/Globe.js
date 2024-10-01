@@ -12,6 +12,7 @@ const GlobeComponent = ({ isAuthenticated, setIsAuthenticated, csrfToken }) => {
   const [cityMarkers, setCityMarkers] = useState([]); // Store city markers
   const globeInstance = useRef(null); // Ref to store the globe instance
   const [showLogin, setShowLogin] = useState(false); // Show login form only when needed
+  const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
     // Fetch countries and cities from the backend
@@ -245,8 +246,17 @@ const GlobeComponent = ({ isAuthenticated, setIsAuthenticated, csrfToken }) => {
       .catch((error) => console.error("Error fetching travel stats:", error));
   }, [countriesData]);
 
+  const statusStatsToggle = () => {
+    setIsVisible(!isVisible);
+  };
+
   return (
     <div className="globeContainer">
+      <button onClick={statusStatsToggle} className="statusToggle">
+        {isVisible
+          ? "Hide Travel Stats & Country Status"
+          : "Show Travel Stats & Country Status"}
+      </button>
       <div id="globe" ref={globeRef}></div>
 
       {/* //Hover country text// */}
@@ -267,30 +277,34 @@ const GlobeComponent = ({ isAuthenticated, setIsAuthenticated, csrfToken }) => {
           Hovering Over: {hoveredCountry}
         </div>
       )}
-      {/* //Travel stats// */}
-      <div className="travelStats">
-        <h4>Travel Stats</h4>
-        <p>Total Countries Visited: {stats.total_countries_visited}</p>
-        <p>Total Cities Visited: {stats.total_cities_visited}</p>
-      </div>
-      {/* //Country status// */}
-      <div className="countryStatus">
-        <h4>Country</h4>
-        <p>
-          <span style={{ color: "rgba(46, 204, 113, 1)" }}>●</span> Visited
-        </p>
-        <p>
-          <span style={{ color: "rgba(241, 196, 15, 1)" }}>●</span> Wish to
-          visit next
-        </p>
-        <p>
-          <span style={{ color: "rgba(231, 76, 60, 1)" }}>●</span> Haven't
-          visited
-        </p>
-        <p>
-          <span style={{ color: "#2980B9" }}>●</span> Cities visited
-        </p>
-      </div>
+      {isVisible && (
+        <>
+          {/* //Travel stats// */}
+          <div className="travelStats">
+            <h4>Travel Stats</h4>
+            <p>Total Countries Visited: {stats.total_countries_visited}</p>
+            <p>Total Cities Visited: {stats.total_cities_visited}</p>
+          </div>
+          {/* //Country status// */}
+          <div className="countryStatus">
+            <h4>Country</h4>
+            <p>
+              <span style={{ color: "rgba(46, 204, 113, 1)" }}>●</span> Visited
+            </p>
+            <p>
+              <span style={{ color: "rgba(241, 196, 15, 1)" }}>●</span> Wish to
+              visit next
+            </p>
+            <p>
+              <span style={{ color: "rgba(231, 76, 60, 1)" }}>●</span> Haven't
+              visited
+            </p>
+            <p>
+              <span style={{ color: "#2980B9" }}>●</span> Cities visited
+            </p>
+          </div>
+        </>
+      )}
       {/* //Country modal// */}
       {selectedCountry && (
         <CountryModal
