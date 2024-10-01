@@ -61,7 +61,9 @@ label {
 .add-button {
   background-color: #28a745;
   margin-left: 10px;
+  /* display: flex; */
 }
+
 .add-city-input {
   padding: 10px;
   font-size: 14px;
@@ -98,4 +100,17 @@ button:hover {
 .clickable-city {
   color: #ffffff;
   cursor: pointer;
+}
+
+@media (max-width: 480px) {
+  .modal-container {
+    padding: 5px;
+    justify-content: center;
+    align-items: center;
+  }
+  .add-button {
+    display: flex;
+    flex-wrap: wrap;
+    margin: 5px auto;
+  }
 }
