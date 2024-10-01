@@ -129,6 +129,10 @@ const CountryModal = ({
   };
 
   const handleNextLocation = () => {
+    if (!isAuthenticated) {
+      alert("You must be logged in to toggle a city.");
+      return;
+    }
     // Use the functional update form to ensure we're working with the latest state
     setLocalCountryData((prevData) => {
       const newStatus = !prevData.future_travel; // Toggle based on the previous state
@@ -233,6 +237,7 @@ const CountryModal = ({
           onClose={handleCityModalClose}
           onSave={handleSaveCity} // Handle save city data
           onDelete={handleDeleteCity} // Handle delete city
+          isAuthenticated={isAuthenticated} // Pass authentication status
         />
       )}
     </Modal>
