@@ -8,7 +8,7 @@ Modal.setAppElement("#root");
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [isMenuOpen, setIsMenuOpen] = useState(false); // New state for toggling the login menu
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -29,30 +29,46 @@ function App() {
   const toggleMenu = () => {
     setIsMenuOpen((prev) => !prev); // Toggle menu state
   };
-  const isMobile = window.innerWidth <= 768; // Check if it's mobile
+
+  const isMobile = window.innerWidth <= 768;
 
   return (
     <div className="App">
       <div className="title">
         <h1>Vinh's Travel Map</h1>
-        {/* Burger Icon */}
-        <div className="burger-icon" onClick={toggleMenu}>
-          <div className="line"></div>
-          <div className="line"></div>
-          <div className="line"></div>
-        </div>
-      </div>
-      <div className="login-container">
-        {/* Show LoginComponent if menu is open and user is not authenticated */}
-        {!isAuthenticated && (!isMobile || isMenuOpen) && (
-          <LoginComponent setIsAuthenticated={handleLogin} />
+
+        {/* Burger Icon for small screens */}
+        {isMobile && (
+          <div className="burger-icon" onClick={toggleMenu}>
+            <div className="line"></div>
+            <div className="line"></div>
+            <div className="line"></div>
+          </div>
         )}
+      </div>
+
+      <div className="login-container">
+        {/* Show login form conditionally */}
+        {!isAuthenticated && (
+          <>
+            {/* On mobile, show the login form only if the menu is open */}
+            {isMobile ? (
+              isMenuOpen && <LoginComponent setIsAuthenticated={handleLogin} />
+            ) : (
+              // On larger screens, always show the login form
+              <LoginComponent setIsAuthenticated={handleLogin} />
+            )}
+          </>
+        )}
+
+        {/* Show logout button if authenticated */}
         {isAuthenticated && (
           <button onClick={handleLogout} className="logout-button">
             Logout
           </button>
         )}
       </div>
+
       <Globe isAuthenticated={isAuthenticated} />
     </div>
   );

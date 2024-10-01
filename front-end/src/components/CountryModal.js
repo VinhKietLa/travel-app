@@ -146,24 +146,6 @@ const CountryModal = ({
     });
   };
 
-  // Fetch and update country status
-  // const updateCountryStatus = () => {
-  //   fetch(`http://localhost:3000/countries/${countryData.id}`)
-  //     .then((response) => response.json())
-  //     .then((updatedCountry) => {
-  //       // Call parent method to update country status in the globe
-  //       if (onCountryStatusUpdate) {
-  //         onCountryStatusUpdate(updatedCountry);
-  //       }
-  //       setCities(updatedCountry.cities); // Ensure cities are updated too if necessary
-  //       countryData.future_travel = updatedCountry.future_travel; // Update the local state for the country modal (so it re-renders with updated data)
-  //       setLocalCountryData(updatedCountry); // Update local country data to ensure the UI reflects the changes
-  //     })
-  //     .catch((error) => {
-  //       console.error("Error updating country status:", error);
-  //     });
-  // };
-
   if (!countryData) return null;
 
   return (

@@ -3,11 +3,23 @@
   font-family: monospace;
   color: #ffffff;
   background-color: #1c1c1e;
+  height: 20%;
 }
 
 .title {
   background-color: #1c1c1e;
   color: #ffffff;
+}
+
+.login-container {
+  display: flex; /* Show login form */
+  flex-direction: column; /* Stack elements vertically */
+  align-items: center; /* Center align */
+  width: 50%; /* Full width on mobile */
+  margin: 0 auto; /* Center the container */
+  padding: 10px; /* Padding for better spacing */
+  background-color: #3c3c3e;
+  border-radius: 8px; /* Rounded corners */
 }
 
 /* Container for login/logout button */
@@ -59,7 +71,6 @@
     width: 50%; /* Full width on mobile */
     margin: 0 auto; /* Center the container */
     padding: 10px; /* Padding for better spacing */
-    background-color: #3c3c3e;
     border-radius: 8px; /* Rounded corners */
   }
 
