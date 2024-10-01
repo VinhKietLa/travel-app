@@ -17,7 +17,7 @@ class ApplicationController < ActionController::API
     end
   
     token = header.split(' ').last
-    Rails.logger.debug "Extracted token: #{token}"
+    Rails.logger.debug "Extracted token: #{token}" # Log the token being processed
   
     begin
       decoded = JwtService.decode(token)
@@ -36,5 +36,7 @@ class ApplicationController < ActionController::API
       render json: { errors: 'Invalid token' }, status: :unauthorized
     end
   end
+  
+  
   
 end

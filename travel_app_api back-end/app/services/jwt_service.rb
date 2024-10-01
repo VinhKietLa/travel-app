@@ -8,6 +8,7 @@ class JwtService
 
   def self.decode(token)
     decoded = JWT.decode(token, SECRET_KEY, true, { algorithm: 'HS256' })[0]
+    Rails.logger.debug "Successfully decoded token: #{decoded.inspect}"
     HashWithIndifferentAccess.new(decoded)
   rescue JWT::ExpiredSignature
     Rails.logger.debug "JWT has expired"
@@ -16,4 +17,5 @@ class JwtService
     Rails.logger.debug "JWT Decode Error: #{e.message}"
     nil
   end
+  
 end

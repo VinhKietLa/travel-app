@@ -31,6 +31,7 @@ const CountryModal = ({
   // Handle adding a new city and saving it to the backend
   const handleAddCity = () => {
     const token = localStorage.getItem("token");
+    console.log("Token being sent:", token); // Add this log to ensure the token is being retrieved
 
     if (!isAuthenticated) {
       alert("You must be logged in to add a city.");
