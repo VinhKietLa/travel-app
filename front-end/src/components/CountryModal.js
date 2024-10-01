@@ -31,7 +31,6 @@ const CountryModal = ({
   // Handle adding a new city and saving it to the backend
   const handleAddCity = () => {
     const token = localStorage.getItem("token");
-    console.log("Token being sent:", token); // Add this log to ensure the token is being retrieved
 
     if (!isAuthenticated) {
       alert("You must be logged in to add a city.");
@@ -82,6 +81,11 @@ const CountryModal = ({
   // Handle removing a city
   const handleDeleteCity = (cityId) => {
     const token = localStorage.getItem("token");
+
+    if (!isAuthenticated) {
+      alert("You must be logged in to delete a city.");
+      return;
+    }
     fetch(
       `${process.env.REACT_APP_API_URL}/countries/${countryData.id}/cities/${cityId}`,
       {
