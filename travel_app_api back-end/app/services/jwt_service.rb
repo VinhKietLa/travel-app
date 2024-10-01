@@ -1,9 +1,9 @@
 class JwtService
-  SECRET_KEY = Rails.application.secrets.secret_key_base
+  SECRET_KEY = Rails.application.credentials.jwt_secret # Use jwt_secret from credentials
 
   def self.encode(payload, exp = 24.hours.from_now)
     payload[:exp] = exp.to_i
-    JWT.encode(payload, SECRET_KEY)
+    JWT.encode(payload, SECRET_KEY) # Use the JWT secret key
   end
 
   def self.decode(token)
@@ -17,5 +17,4 @@ class JwtService
     Rails.logger.debug "JWT Decode Error: #{e.message}"
     nil
   end
-  
 end
