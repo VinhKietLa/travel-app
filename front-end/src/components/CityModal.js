@@ -5,7 +5,14 @@ import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 import Slider from "react-slick"; // Import Slider from react-slick
 
-const CityModal = ({ isOpen, cityData, onClose, onSave, onDelete }) => {
+const CityModal = ({
+  isOpen,
+  cityData,
+  onClose,
+  onSave,
+  onDelete,
+  isAuthenticated,
+}) => {
   const [name, setName] = useState("");
   const [recommendations, setRecommendations] = useState("");
   const [highlights, setHighlights] = useState("");
@@ -55,6 +62,10 @@ const CityModal = ({ isOpen, cityData, onClose, onSave, onDelete }) => {
   };
 
   const handleFileUpload = async () => {
+    if (!isAuthenticated) {
+      alert("You must be logged upload images.");
+      return;
+    }
     setLoading(true);
     const formData = new FormData();
     for (let i = 0; i < selectedFiles.length; i++) {
@@ -97,6 +108,10 @@ const CityModal = ({ isOpen, cityData, onClose, onSave, onDelete }) => {
   };
 
   const handleSave = () => {
+    if (!isAuthenticated) {
+      alert("You must be logged in to update city information");
+      return;
+    }
     const updatedCityData = {
       ...cityData,
       name,
