@@ -21,6 +21,8 @@ const CountryModal = ({
   const [localCountryData, setLocalCountryData] = useState(countryData);
 
   useEffect(() => {
+    console.log("JWT Token:", token);
+
     if (countryData) {
       // Ensure cities is always set as an array
       setCities(Array.isArray(countryData.cities) ? countryData.cities : []);
