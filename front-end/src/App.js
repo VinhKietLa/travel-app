@@ -29,6 +29,7 @@ function App() {
   const toggleMenu = () => {
     setIsMenuOpen((prev) => !prev); // Toggle menu state
   };
+  const isMobile = window.innerWidth <= 768; // Check if it's mobile
 
   return (
     <div className="App">
@@ -43,7 +44,7 @@ function App() {
       </div>
       <div className="login-container">
         {/* Show LoginComponent if menu is open and user is not authenticated */}
-        {!isAuthenticated && isMenuOpen && (
+        {!isAuthenticated && (!isMobile || isMenuOpen) && (
           <LoginComponent setIsAuthenticated={handleLogin} />
         )}
         {isAuthenticated && (

@@ -28,8 +28,6 @@
   background-color: #ff3333;
 }
 
-/* Add to App.css */
-
 /* Burger icon styles */
 .burger-icon {
   display: none; /* Hidden by default */
@@ -47,40 +45,92 @@
   margin: 4px 0; /* Spacing between lines */
   transition: all 0.3s ease; /* Optional transition effect */
 }
-
 @media (max-width: 480px) {
-  .burger-icon {
-    display: flex; /* Show burger icon on mobile */
+  .App {
+    display: flex;
     flex-direction: column;
-    margin-right: 10px;
+    align-items: center; /* Center align items */
   }
 
-  /* Login container styling for mobile */
   .App .login-container {
     display: flex; /* Show login form */
     flex-direction: column; /* Stack elements vertically */
     align-items: center; /* Center align */
-    width: 90%; /* Full width on mobile */
+    width: 50%; /* Full width on mobile */
     margin: 0 auto; /* Center the container */
     padding: 10px; /* Padding for better spacing */
-    /* background-color: #3c3c3e; Background color */
+    background-color: #3c3c3e;
     border-radius: 8px; /* Rounded corners */
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3); /* Shadow for depth */
+  }
+
+  .App .login-form {
+    flex-direction: column;
+  }
+  .title {
+    font-size: 9px;
+  }
+  .burger-icon {
+    display: flex; /* Show burger icon on mobile */
+    flex-direction: column;
+  }
+
+  .globeContainer {
+    width: 100%; /* Full width for the globe */
+    height: 200px; /* Set a fixed height for the globe */
+  }
+
+  .travelStats,
+  .countryStatus {
+    width: 90%; /* Allow for some margins */
+    padding: 10px; /* Padding for better touch targets */
+    margin-top: 10px; /* Space between elements */
+    background: #333; /* Background for contrast */
+    border-radius: 5px; /* Rounded corners */
   }
 }
 
 @media (min-width: 481px) and (max-width: 767px) {
-  /* Styles for larger smartphones */
-}
+  .App {
+    display: flex;
+    flex-direction: column;
+    align-items: center; /* Center align items */
+  }
 
-@media (min-width: 768px) and (max-width: 1024px) {
-  /* Styles for tablets in portrait mode */
-}
+  .App .login-container {
+    display: flex; /* Show login form */
+    flex-direction: column; /* Stack elements vertically */
+    align-items: center; /* Center align */
+    width: 50%; /* Full width on mobile */
+    margin: 0 auto; /* Center the container */
+    padding: 10px; /* Padding for better spacing */
+    background-color: #3c3c3e;
+    border-radius: 8px; /* Rounded corners */
+  }
 
-@media (min-width: 1025px) and (max-width: 1280px) {
-  /* Styles for tablets in landscape mode and small laptops */
-}
+  .App .login-form {
+    flex-direction: column;
+  }
+  .title {
+    font-size: 9px;
+  }
+  .burger-icon {
+    display: flex; /* Show burger icon on mobile */
+    flex-direction: column;
+    /* margin-right: 10px; */
+  }
 
-@media (min-width: 1281px) {
-  /* Styles for larger screens */
+  .globeContainer {
+    width: 100%; /* Full width for the globe */
+    height: 200px; /* Set a fixed height for the globe */
+  }
+
+  .travelStats,
+  .countryStatus {
+    width: 90%; /* Allow for some margins */
+    padding: 10px; /* Padding for better touch targets */
+    margin-top: 10px; /* Space between elements */
+    background: #333; /* Background for contrast */
+    border-radius: 5px; /* Rounded corners */
+  }
 }
+/*  */
