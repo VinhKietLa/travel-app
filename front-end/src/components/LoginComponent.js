@@ -19,7 +19,6 @@ export const LoginComponent = ({ setIsAuthenticated }) => {
       .then((data) => {
         if (data.token) {
           localStorage.setItem("token", data.token);
-          console;
           setIsAuthenticated(data.token);
         } else {
           alert("Login failed");
