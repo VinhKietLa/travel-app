@@ -21,8 +21,6 @@ const CountryModal = ({
   const [localCountryData, setLocalCountryData] = useState(countryData);
 
   useEffect(() => {
-    console.log("JWT Token:", token);
-
     if (countryData) {
       // Ensure cities is always set as an array
       setCities(Array.isArray(countryData.cities) ? countryData.cities : []);
@@ -33,6 +31,7 @@ const CountryModal = ({
   // Handle adding a new city and saving it to the backend
   const handleAddCity = () => {
     const token = localStorage.getItem("token");
+    console.log("Token being sent:", token); // Add this log to ensure the token is being retrieved
 
     if (!isAuthenticated) {
       alert("You must be logged in to add a city.");
