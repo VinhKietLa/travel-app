@@ -123,10 +123,6 @@ const GlobeComponent = ({ isAuthenticated, setIsAuthenticated, csrfToken }) => {
   };
 
   const handleCityAdded = (newCity, updatedCountry) => {
-    if (!isAuthenticated) {
-      setShowLogin(true); // Show login form if user isn't logged in
-      return;
-    }
     if (updatedCountry && updatedCountry.id) {
       setCountriesData((prevCountries) =>
         prevCountries.map((country) =>
@@ -148,10 +144,6 @@ const GlobeComponent = ({ isAuthenticated, setIsAuthenticated, csrfToken }) => {
   };
 
   const handleCityDeleted = (countryId) => {
-    if (!isAuthenticated) {
-      setShowLogin(true); // Show login form if user isn't logged in
-      return;
-    }
     fetch(`${process.env.REACT_APP_API_URL}/countries/${countryId}`, {
       credentials: "include", // Include session cookies
       headers: {
@@ -175,7 +167,7 @@ const GlobeComponent = ({ isAuthenticated, setIsAuthenticated, csrfToken }) => {
     const token = localStorage.getItem("token");
 
     if (!isAuthenticated) {
-      alert("You must be logged in to add a city.");
+      alert("You must be logged in to toggle a city.");
       return;
     }
 

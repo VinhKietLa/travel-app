@@ -79,6 +79,8 @@ Rails.application.configure do
 
   # Do not dump schema after migrations.
   config.active_record.dump_schema_after_migration = false
+  config.active_storage.default_url_options = { host: 'https://travel-app-1-m9f2.onrender.com' }
+  config.public_file_server.enabled = true
 
   # Enable DNS rebinding protection and other `Host` header attacks.
   # config.hosts = [
